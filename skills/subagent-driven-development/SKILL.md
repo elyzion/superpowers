@@ -154,11 +154,6 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 ## Prompt Templates
 
-**Implementer templates:**
-- `./implementer-prompt.md` - Dispatch implementer subagent
-- `./rust-developer-prompt.md` - Dispatch Rust specialist subagent (for specialist routing)
-- `./ml-engineer-prompt.md` - Dispatch ML specialist subagent (for specialist routing)
-
 **Review templates:**
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
 - `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
