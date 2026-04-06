@@ -64,15 +64,15 @@ LOG_FILE="$OUTPUT_DIR/claude-output.json"
 cd "$PROJECT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
-echo "Running claude -p with explicit skill request..."
+echo "Running qwen with explicit skill request..."
 echo "Prompt: $PROMPT"
 echo ""
 
-timeout 300 claude -p "$PROMPT" \
+timeout 300 qwen "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns "$MAX_TURNS" \
-    --output-format stream-json \
+    -o stream-json \
     > "$LOG_FILE" 2>&1 || true
 
 echo ""

@@ -23,56 +23,56 @@ cd "$PROJECT_DIR"
 
 # Turn 1: Start brainstorming
 echo ">>> Turn 1: Brainstorming request..."
-claude -p "I want to add user authentication to my app. Help me think through this." \
+qwen "I want to add user authentication to my app. Help me think through this." \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 3 \
-    --output-format stream-json \
+    -o stream-json \
     > "$OUTPUT_DIR/turn1.json" 2>&1 || true
 echo "Done."
 
 # Turn 2: Answer a brainstorming question
 echo ">>> Turn 2: Answering questions..."
-claude -p "Let's use JWT tokens with 24-hour expiry. Email/password registration." \
-    --continue \
+qwen "Let's use JWT tokens with 24-hour expiry. Email/password registration." \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 3 \
-    --output-format stream-json \
+    -o stream-json \
     > "$OUTPUT_DIR/turn2.json" 2>&1 || true
 echo "Done."
 
 # Turn 3: Ask to write a plan
 echo ">>> Turn 3: Requesting plan..."
-claude -p "Great, write this up as an implementation plan." \
-    --continue \
+qwen "Great, write this up as an implementation plan." \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 3 \
-    --output-format stream-json \
+    -o stream-json \
     > "$OUTPUT_DIR/turn3.json" 2>&1 || true
 echo "Done."
 
 # Turn 4: Confirm plan looks good
 echo ">>> Turn 4: Confirming plan..."
-claude -p "The plan looks good. What are my options for executing it?" \
-    --continue \
+qwen "The plan looks good. What are my options for executing it?" \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$OUTPUT_DIR/turn4.json" 2>&1 || true
 echo "Done."
 
 # Turn 5: THE CRITICAL TEST
 echo ">>> Turn 5: Requesting subagent-driven-development..."
 FINAL_LOG="$OUTPUT_DIR/turn5.json"
-claude -p "subagent-driven-development, please" \
-    --continue \
+qwen "subagent-driven-development, please" \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$FINAL_LOG" 2>&1 || true
 echo "Done."
 echo ""

@@ -46,11 +46,11 @@ EOF
 # Turn 1: Start a planning conversation
 echo ">>> Turn 1: Starting planning conversation..."
 TURN1_LOG="$OUTPUT_DIR/turn1.json"
-claude -p "I need to implement an authentication system. Let's plan this out. The requirements are: user registration with email/password, JWT tokens, and protected routes." \
+qwen "I need to implement an authentication system. Let's plan this out. The requirements are: user registration with email/password, JWT tokens, and protected routes." \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$TURN1_LOG" 2>&1 || true
 
 echo "Turn 1 complete."
@@ -59,12 +59,12 @@ echo ""
 # Turn 2: Continue with more planning detail
 echo ">>> Turn 2: Continuing planning..."
 TURN2_LOG="$OUTPUT_DIR/turn2.json"
-claude -p "Good analysis. I've already written the plan to docs/superpowers/plans/auth-system.md. Now I'm ready to implement. What are my options for execution?" \
-    --continue \
+qwen "Good analysis. I've already written the plan to docs/superpowers/plans/auth-system.md. Now I'm ready to implement. What are my options for execution?" \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$TURN2_LOG" 2>&1 || true
 
 echo "Turn 2 complete."
@@ -73,12 +73,12 @@ echo ""
 # Turn 3: The critical test - ask for subagent-driven-development
 echo ">>> Turn 3: Requesting subagent-driven-development..."
 TURN3_LOG="$OUTPUT_DIR/turn3.json"
-claude -p "subagent-driven-development, please" \
-    --continue \
+qwen "subagent-driven-development, please" \
+    -c \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$TURN3_LOG" 2>&1 || true
 
 echo "Turn 3 complete."

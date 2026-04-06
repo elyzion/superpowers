@@ -36,25 +36,25 @@ EOF
 
 # Turn 1: Have Claude describe execution options including SDD
 echo ">>> Turn 1: Ask Claude to describe execution options..."
-claude -p "I have a plan at docs/superpowers/plans/auth-system.md. Tell me about my options for executing it, including what subagent-driven-development means and how it works." \
-    --model haiku \
+qwen "I have a plan at docs/superpowers/plans/auth-system.md. Tell me about my options for executing it, including what subagent-driven-development means and how it works." \
+    -m \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns 3 \
-    --output-format stream-json \
+    -o stream-json \
     > "$OUTPUT_DIR/turn1.json" 2>&1 || true
 echo "Done."
 
 # Turn 2: THE CRITICAL TEST - now that Claude has explained it
 echo ">>> Turn 2: Request subagent-driven-development..."
 FINAL_LOG="$OUTPUT_DIR/turn2.json"
-claude -p "subagent-driven-development, please" \
-    --continue \
-    --model haiku \
+qwen "subagent-driven-development, please" \
+    -c \
+    -m \
     --plugin-dir "$PLUGIN_DIR" \
     --dangerously-skip-permissions \
     --max-turns 2 \
-    --output-format stream-json \
+    -o stream-json \
     > "$FINAL_LOG" 2>&1 || true
 echo "Done."
 echo ""
