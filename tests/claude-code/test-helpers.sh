@@ -19,7 +19,7 @@ with open('$input_file') as f:
                         msg = json.loads(msg)
                     except:
                         continue
-                # Extract text from content array (Claude-compatible format)
+                # Extract text from content array (Qwen stream-json format)
                 content = msg.get('content', [])
                 for part in content:
                     if isinstance(part, dict) and part.get('type') == 'text':

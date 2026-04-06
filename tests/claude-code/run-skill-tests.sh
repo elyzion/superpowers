@@ -18,7 +18,7 @@ echo ""
 # Check if Qwen Code is available
 if ! command -v qwen &> /dev/null; then
     echo "ERROR: Qwen Code CLI not found"
-    echo "Install Qwen Code first: https://code.claude.com"
+    echo "Install Qwen Code first: https://qwenlm.github.io/qwen-code-docs/"
     exit 1
 fi
 

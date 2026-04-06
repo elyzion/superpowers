@@ -2,7 +2,7 @@
 # Test skill triggering with naive prompts
 # Usage: ./run-test.sh <skill-name> <prompt-file>
 #
-# Tests whether Claude triggers a skill based on a natural prompt
+# Tests whether Qwen triggers a skill based on a natural prompt
 # (without explicitly mentioning the skill)
 
 set -e
@@ -39,8 +39,8 @@ echo ""
 # Copy prompt for reference
 cp "$PROMPT_FILE" "$OUTPUT_DIR/prompt.txt"
 
-# Run Claude
-LOG_FILE="$OUTPUT_DIR/claude-output.json"
+# Run Qwen
+LOG_FILE="$OUTPUT_DIR/qwen-output.json"
 cd "$OUTPUT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"

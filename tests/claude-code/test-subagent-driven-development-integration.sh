@@ -115,9 +115,9 @@ echo ""
 echo "Project setup complete. Starting execution..."
 echo ""
 
-# Run Claude with subagent-driven-development
+# Run Qwen with subagent-driven-development
 # Capture full output to analyze
-OUTPUT_FILE="$TEST_PROJECT/claude-output.txt"
+OUTPUT_FILE="$TEST_PROJECT/qwen-output.txt"
 
 # Create prompt file
 cat > "$TEST_PROJECT/prompt.txt" <<'EOF'
@@ -147,9 +147,9 @@ IMPORTANT: Follow the skill exactly. I will be verifying that you:
 
 Begin now. Execute the plan."
 
-echo "Running Claude (output will be shown below and saved to $OUTPUT_FILE)..."
+echo "Running Qwen (output will be shown below and saved to $OUTPUT_FILE)..."
 echo "================================================================================"
-cd "$SCRIPT_DIR/../.." && timeout 1800 claude -p "$PROMPT" --allowed-tools=all --add-dir "$TEST_PROJECT" --permission-mode bypassPermissions 2>&1 | tee "$OUTPUT_FILE" || {
+cd "$SCRIPT_DIR/../.." && run_qwen "$PROMPT" 600 "$TEST_PROJECT" > "$OUTPUT_FILE" || {
     echo ""
     echo "================================================================================"
     echo "EXECUTION FAILED (exit code: $?)"

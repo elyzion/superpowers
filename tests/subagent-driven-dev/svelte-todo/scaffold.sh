@@ -18,9 +18,9 @@ git init
 cp "$SCRIPT_DIR/design.md" .
 cp "$SCRIPT_DIR/plan.md" .
 
-# Create .claude settings to allow reads/writes in this directory
-mkdir -p .claude
-cat > .claude/settings.local.json << 'SETTINGS'
+# Create .qwen settings to allow reads/writes in this directory
+mkdir -p .qwen
+cat > .qwen/settings.local.json << 'SETTINGS'
 {
   "permissions": {
     "allow": [

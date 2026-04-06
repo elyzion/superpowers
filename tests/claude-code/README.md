@@ -4,11 +4,11 @@ Automated tests for superpowers skills using Qwen Code CLI.
 
 ## Overview
 
-This test suite verifies that skills are loaded correctly and Claude follows them as expected. Tests invoke Qwen Code in headless mode (`qwen`) and verify the behavior.
+This test suite verifies that skills are loaded correctly and Qwen follows them as expected. Tests invoke Qwen Code in headless mode (`qwen`) and verify the behavior.
 
 ## Requirements
 
-- Qwen Code CLI installed and in PATH (`claude --version` should work)
+- Qwen Code CLI installed and in PATH (`qwen --version` should work)
 - Local superpowers plugin installed (see main README for installation)
 
 ## Running Tests
@@ -42,7 +42,7 @@ This test suite verifies that skills are loaded correctly and Claude follows the
 
 ### test-helpers.sh
 Common functions for skills testing:
-- `run_claude "prompt" [timeout]` - Run Claude with prompt
+- `run_qwen "prompt" [timeout]` - Run Qwen with prompt
 - `assert_contains output pattern name` - Verify pattern exists
 - `assert_not_contains output pattern name` - Verify pattern absent
 - `assert_count output pattern count name` - Verify exact count
@@ -69,8 +69,8 @@ source "$SCRIPT_DIR/test-helpers.sh"
 
 echo "=== Test: My Skill ==="
 
-# Ask Claude about the skill
-output=$(run_claude "What does the my-skill skill do?" 30)
+# Ask Qwen about the skill
+output=$(run_qwen "What does the my-skill skill do?" 30)
 
 # Verify response
 assert_contains "$output" "expected behavior" "Skill describes behavior"
@@ -119,7 +119,7 @@ Full workflow execution test (~10-30 minutes):
 
 1. Create new test file: `test-<skill-name>.sh`
 2. Source test-helpers.sh
-3. Write tests using `run_claude` and assertions
+3. Write tests using `run_qwen` and assertions
 4. Add to test list in `run-skill-tests.sh`
 5. Make executable: `chmod +x test-<skill-name>.sh`
 
@@ -132,7 +132,7 @@ Full workflow execution test (~10-30 minutes):
 
 ## Debugging Failed Tests
 
-With `--verbose`, you'll see full Claude output:
+With `--verbose`, you'll see full Qwen output:
 ```bash
 ./run-skill-tests.sh --verbose --test test-subagent-driven-development.sh
 ```

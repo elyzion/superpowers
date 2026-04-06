@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test with haiku model and user's CLAUDE.md
+# Test with small-model model and user's QWEN.md
 # This tests whether a cheaper/faster model fails more easily
 
 set -e
@@ -8,26 +8,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 TIMESTAMP=$(date +%s)
-OUTPUT_DIR="/tmp/superpowers-tests/${TIMESTAMP}/explicit-skill-requests/haiku"
+OUTPUT_DIR="/tmp/superpowers-tests/${TIMESTAMP}/explicit-skill-requests/small-model"
 mkdir -p "$OUTPUT_DIR"
 
 PROJECT_DIR="$OUTPUT_DIR/project"
 mkdir -p "$PROJECT_DIR/docs/superpowers/plans"
-mkdir -p "$PROJECT_DIR/.claude"
+mkdir -p "$PROJECT_DIR/.qwen"
 
-echo "=== Haiku Model Test with User CLAUDE.md ==="
+echo "=== Small Model Test with User QWEN.md ==="
 echo "Output dir: $OUTPUT_DIR"
 echo "Plugin dir: $PLUGIN_DIR"
 echo ""
 
 cd "$PROJECT_DIR"
 
-# Copy user's CLAUDE.md to simulate real environment
-if [ -f "$HOME/.claude/CLAUDE.md" ]; then
-    cp "$HOME/.claude/CLAUDE.md" "$PROJECT_DIR/.claude/CLAUDE.md"
-    echo "Copied user CLAUDE.md"
+# Copy user's QWEN.md to simulate real environment
+if [ -f "$HOME/.qwen/QWEN.md" ]; then
+    cp "$HOME/.qwen/QWEN.md" "$PROJECT_DIR/.qwen/QWEN.md"
+    echo "Copied user QWEN.md"
 else
-    echo "No user CLAUDE.md found, proceeding without"
+    echo "No user QWEN.md found, proceeding without"
 fi
 
 # Create a dummy plan file
@@ -52,7 +52,7 @@ echo ""
 # Turn 1: Start brainstorming
 echo ">>> Turn 1: Brainstorming request..."
 qwen "I want to add user authentication to my app. Help me think through this." \
-    --model haiku \
+    --model small-model \
     --plugin-dir "$PLUGIN_DIR" \
     -y \
     --max-turns 3 \
@@ -64,7 +64,7 @@ echo "Done."
 echo ">>> Turn 2: Answering questions..."
 qwen "Let's use JWT tokens with 24-hour expiry. Email/password registration." \
     -c \
-    --model haiku \
+    --model small-model \
     --plugin-dir "$PLUGIN_DIR" \
     -y \
     --max-turns 3 \
@@ -76,7 +76,7 @@ echo "Done."
 echo ">>> Turn 3: Requesting plan..."
 qwen "Great, write this up as an implementation plan." \
     -c \
-    --model haiku \
+    --model small-model \
     --plugin-dir "$PLUGIN_DIR" \
     -y \
     --max-turns 3 \
@@ -88,7 +88,7 @@ echo "Done."
 echo ">>> Turn 4: Confirming plan..."
 qwen "The plan looks good. What are my options for executing it?" \
     -c \
-    --model haiku \
+    --model small-model \
     --plugin-dir "$PLUGIN_DIR" \
     -y \
     --max-turns 2 \
@@ -101,7 +101,7 @@ echo ">>> Turn 5: Requesting subagent-driven-development..."
 FINAL_LOG="$OUTPUT_DIR/turn5.json"
 qwen "subagent-driven-development, please" \
     -c \
-    --model haiku \
+    --model small-model \
     --plugin-dir "$PLUGIN_DIR" \
     -y \
     --max-turns 2 \
@@ -110,7 +110,7 @@ qwen "subagent-driven-development, please" \
 echo "Done."
 echo ""
 
-echo "=== Results (Haiku) ==="
+echo "=== Results (Small model) ==="
 
 # Check final turn
 SKILL_PATTERN='"skill":"([^"]*:)?subagent-driven-development"'

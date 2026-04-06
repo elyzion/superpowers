@@ -2,7 +2,7 @@
 # Test explicit skill requests (user names a skill directly)
 # Usage: ./run-test.sh <skill-name> <prompt-file>
 #
-# Tests whether Claude invokes a skill when the user explicitly requests it by name
+# Tests whether Qwen invokes a skill when the user explicitly requests it by name
 # (without using the plugin namespace prefix)
 #
 # Uses isolated HOME to avoid user context interference
@@ -59,8 +59,8 @@ Create login and register endpoints.
 Protect routes with JWT validation.
 EOF
 
-# Run Claude with isolated environment
-LOG_FILE="$OUTPUT_DIR/claude-output.json"
+# Run Qwen with isolated environment
+LOG_FILE="$OUTPUT_DIR/qwen-output.json"
 cd "$PROJECT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
@@ -94,12 +94,12 @@ echo ""
 echo "Skills triggered in this run:"
 grep -o '"skill":"[^"]*"' "$LOG_FILE" 2>/dev/null | sort -u || echo "  (none)"
 
-# Check if Claude took action BEFORE invoking the skill (the failure mode)
+# Check if Qwen took action BEFORE invoking the skill (the failure mode)
 echo ""
 echo "Checking for premature action..."
 
 # Look for tool invocations before the Skill invocation
-# This detects the failure mode where Claude starts doing work without loading the skill
+# This detects the failure mode where Qwen starts doing work without loading the skill
 FIRST_SKILL_LINE=$(grep -n '"name":"Skill"' "$LOG_FILE" | head -1 | cut -d: -f1)
 if [ -n "$FIRST_SKILL_LINE" ]; then
     # Check if any non-Skill, non-system tools were invoked before the first Skill invocation
@@ -112,7 +112,7 @@ if [ -n "$FIRST_SKILL_LINE" ]; then
         echo "WARNING: Tools invoked BEFORE Skill tool:"
         echo "$PREMATURE_TOOLS" | head -5
         echo ""
-        echo "This indicates Claude started working before loading the requested skill."
+        echo "This indicates Qwen started working before loading the requested skill."
     else
         echo "OK: No premature tool invocations detected"
     fi
