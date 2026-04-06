@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Analyze token usage from Claude Code session transcripts.
+Analyze token usage from Qwen Code session transcripts.
 Breaks down usage by main session and individual subagents.
 """
 
@@ -9,8 +9,17 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
+def parse_message_field(field):
+    """Parse a message field that may be a string (JSON) or dict."""
+    if isinstance(field, str):
+        try:
+            return json.loads(field)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    return field
+
 def analyze_main_session(filepath):
-    """Analyze a session file and return token usage broken down by agent."""
+    """Analyze a Qwen Code session file and return token usage broken down by agent."""
     main_usage = {
         'input_tokens': 0,
         'output_tokens': 0,
@@ -19,7 +28,7 @@ def analyze_main_session(filepath):
         'messages': 0
     }
 
-    # Track usage per subagent
+    # Track usage per subagent (task tool calls)
     subagent_usage = defaultdict(lambda: {
         'input_tokens': 0,
         'output_tokens': 0,
@@ -29,41 +38,47 @@ def analyze_main_session(filepath):
         'description': None
     })
 
+    subagent_counter = 0
+
     with open(filepath, 'r') as f:
         for line in f:
             try:
                 data = json.loads(line)
 
-                # Main session assistant messages
+                # Assistant messages (main session)
                 if data.get('type') == 'assistant' and 'message' in data:
                     main_usage['messages'] += 1
-                    msg_usage = data['message'].get('usage', {})
-                    main_usage['input_tokens'] += msg_usage.get('input_tokens', 0)
-                    main_usage['output_tokens'] += msg_usage.get('output_tokens', 0)
-                    main_usage['cache_creation'] += msg_usage.get('cache_creation_input_tokens', 0)
-                    main_usage['cache_read'] += msg_usage.get('cache_read_input_tokens', 0)
 
-                # Subagent tool results
-                if data.get('type') == 'user' and 'toolUseResult' in data:
-                    result = data['toolUseResult']
-                    if 'usage' in result and 'agentId' in result:
-                        agent_id = result['agentId']
-                        usage = result['usage']
+                    # Usage metadata is at the top level of the data object
+                    if 'usageMetadata' in data:
+                        um = data['usageMetadata']
+                        if isinstance(um, str):
+                            um = parse_message_field(um)
+                        main_usage['input_tokens'] += um.get('promptTokenCount', 0) + um.get('thoughtsTokenCount', 0)
+                        main_usage['output_tokens'] += um.get('candidatesTokenCount', 0)
+                        main_usage['cache_creation'] += um.get('cacheCreationInputTokens', 0)
+                        main_usage['cache_read'] += um.get('cachedContentTokenCount', 0)
 
-                        # Get description from prompt if available
-                        if subagent_usage[agent_id]['description'] is None:
-                            prompt = result.get('prompt', '')
-                            # Extract first line as description
-                            first_line = prompt.split('\n')[0] if prompt else f"agent-{agent_id}"
-                            if first_line.startswith('You are '):
-                                first_line = first_line[8:]  # Remove "You are "
-                            subagent_usage[agent_id]['description'] = first_line[:60]
+                    # Detect subagent (task) tool calls in message parts
+                    msg = parse_message_field(data['message'])
+                    parts = msg.get('parts', [])
+                    if isinstance(parts, str):
+                        parts = parse_message_field(parts)
 
-                        subagent_usage[agent_id]['messages'] += 1
-                        subagent_usage[agent_id]['input_tokens'] += usage.get('input_tokens', 0)
-                        subagent_usage[agent_id]['output_tokens'] += usage.get('output_tokens', 0)
-                        subagent_usage[agent_id]['cache_creation'] += usage.get('cache_creation_input_tokens', 0)
-                        subagent_usage[agent_id]['cache_read'] += usage.get('cache_read_input_tokens', 0)
+                    if isinstance(parts, list):
+                        for part in parts:
+                            if not isinstance(part, dict):
+                                continue
+                            if 'functionCall' in part:
+                                fc = parse_message_field(part['functionCall'])
+                                if fc.get('name') == 'task':
+                                    subagent_counter += 1
+                                    agent_id = f"subagent-{subagent_counter}"
+                                    args = parse_message_field(fc.get('args', '{}'))
+                                    desc = args.get('description', f"Task {subagent_counter}")
+                                    subagent_usage[agent_id]['description'] = desc[:60]
+                                    subagent_usage[agent_id]['messages'] += 1
+
             except Exception:
                 pass
 
