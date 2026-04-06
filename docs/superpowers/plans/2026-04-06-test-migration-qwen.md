@@ -293,3 +293,34 @@ git add tests/subagent-driven-dev/ && git commit -m "test: update subagent-drive
 Replace claude CLI with qwen in e2e subagent tests.
 Update session log paths and token analysis."
 ```
+
+### Task 8: Fix Remaining Claude References (Retrospective)
+
+**Discovered during post-merge audit** — grep found 30+ remaining Claude references across test files that were missed in the initial migration.
+
+**Files:**
+- Modify: `tests/claude-code/run-skill-tests.sh` — install URL
+- Modify: `tests/claude-code/test-helpers.sh` — 1 comment
+- Modify: `tests/claude-code/test-subagent-driven-development-integration.sh` — 4 refs + `claude -p` call
+- Modify: `tests/explicit-skill-requests/run-haiku-test.sh` — CLAUDE.md, .claude/ dir, 7+ refs
+- Modify: `tests/explicit-skill-requests/run-multiturn-test.sh` — 1 comment
+- Modify: `tests/explicit-skill-requests/run-test.sh` — 6 refs + claude-output.json
+- Modify: `tests/explicit-skill-requests/run-qwen-describes-sdd.sh` — 9 comment/echo refs
+- Modify: `tests/skill-triggering/run-test.sh` — 3 refs + claude-output.json
+- Modify: `tests/subagent-driven-dev/go-fractals/scaffold.sh` — .claude/ dir
+
+**Commit Scope:** tests
+
+- [ ] **Step 1: Fix all files**
+
+Replace all remaining "Claude" → "Qwen" in comments, echo strings, variable names, file names (.claude/ → .qwen/, CLAUDE.md → QWEN.md, claude-output.json → qwen-output.json). Update `claude -p` calls to `run_qwen`. Update `--model haiku` to `-m <model>`. Update install URLs.
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add tests/ && git commit -m "test: remove remaining Claude references from all test files
+
+Retroactive fix: grep audit found 30+ remaining Claude references
+in comments, variable names, file names, echo strings, and one
+remaining claude -p call. All replaced with Qwen equivalents."
+```
