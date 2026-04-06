@@ -10,7 +10,7 @@ Once it's teased a spec out of the conversation, it shows it to you in chunks sh
 
 After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
 
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It dispatches specialist agents for domains like Rust development, ML/AI engineering, and QA/testing — bringing domain expertise to every task. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
+Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It dispatches specialist agents for domains like Rust development, ML/AI engineering, and QA/testing — with local and cloud variants for each — bringing domain expertise to every task. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
 
 There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
 
@@ -113,7 +113,7 @@ Start a new session in your chosen platform and ask for something that should tr
 
 3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps.
 
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with three-stage review (spec compliance, code quality, QA/testing), or executes in batches with human checkpoints. Routes tasks to specialist agents (rust-developer, ml-engineer, qa-tester) when the plan specifies a domain.
+4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with three-stage review (spec compliance, code quality, QA/testing), or executes in batches with human checkpoints. Routes tasks to specialist agents (rust-engineer-local/cloud, ml-engineer-local/cloud, general-engineer-local/cloud, qa-tester, code-reviewer) when the plan specifies a domain.
 
 5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
 
@@ -147,8 +147,12 @@ Start a new session in your chosen platform and ask for something that should tr
 
 **Specialist Agents**
 - **code-reviewer** - General code review against plans and standards
-- **rust-developer** - Rust ownership, borrowing, clippy, unsafe scrutiny
-- **ml-engineer** - ML pipelines, data validation, evaluation, reproducibility
+- **rust-engineer-local** - Rust mechanical tasks (derive macros, boilerplate, clippy fixes)
+- **rust-engineer-cloud** - Rust complex reasoning (lifetimes, async, FFI, performance)
+- **ml-engineer-local** - ML simple tasks (data loading, preprocessing, basic evaluation)
+- **ml-engineer-cloud** - ML architecture (model selection, evaluation methodology, prompt engineering)
+- **general-engineer-local** - Mechanical changes (single-file edits, boilerplate, refactoring)
+- **general-engineer-cloud** - Multi-file integration, architecture, debugging
 - **qa-tester** - Test strategy, edge case mining, anti-pattern detection
 
 **Meta**

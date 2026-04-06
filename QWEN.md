@@ -34,10 +34,14 @@ superpowers/
 │   ├── writing-plans/         # Detailed implementation planning
 │   └── writing-skills/        # Create new skills (meta-skill)
 ├── agents/                    # Agent configuration files
-│   ├── code-reviewer.md       # General code reviewer agent definition
-│   ├── rust-developer.md      # Rust specialist implementer
-│   ├── qa-tester.md           # QA/testing specialist reviewer
-│   └── ml-engineer.md         # ML/AI specialist implementer
+│   ├── code-reviewer.md              # General code reviewer agent definition
+│   ├── general-engineer-local.md     # Local general-purpose implementer
+│   ├── general-engineer-cloud.md     # Cloud general-purpose implementer
+│   ├── ml-engineer-local.md          # Local ML specialist
+│   ├── ml-engineer-cloud.md          # Cloud ML specialist
+│   ├── qa-tester.md                  # QA/testing specialist reviewer
+│   ├── rust-engineer-local.md        # Local Rust specialist
+│   └── rust-engineer-cloud.md        # Cloud Rust specialist
 ├── commands/                  # CLI commands for various platforms
 ├── docs/                      # Documentation files
 ├── hooks/                     # Platform-specific hooks (Claude Code, Cursor)
@@ -65,9 +69,13 @@ superpowers/
 | `hooks/hooks.json` | Hook definitions for session start |
 | `hooks/run-hook.cmd` | Hook execution script |
 | `agents/code-reviewer.md` | General code reviewer agent |
-| `agents/rust-developer.md` | Rust specialist agent |
+| `agents/general-engineer-local.md` | Local general-purpose implementer |
+| `agents/general-engineer-cloud.md` | Cloud general-purpose implementer |
+| `agents/ml-engineer-local.md` | Local ML specialist |
+| `agents/ml-engineer-cloud.md` | Cloud ML specialist |
 | `agents/qa-tester.md` | QA/testing specialist agent |
-| `agents/ml-engineer.md` | ML/AI specialist agent |
+| `agents/rust-engineer-local.md` | Local Rust specialist |
+| `agents/rust-engineer-cloud.md` | Cloud Rust specialist |
 
 ## Skills Workflow
 
@@ -85,14 +93,16 @@ The skills trigger automatically based on context:
 
 When `subagent-driven-development` executes a plan, it dispatches the appropriate agent based on:
 
-1. **Plan-level `Domain Specialist:`** — annotated by writing-plans (e.g., `rust-developer`, `ml-engineer`, `qa-tester`)
+1. **Plan-level `Domain Specialist:`** — annotated by writing-plans (e.g., `rust-engineer-cloud`, `ml-engineer-cloud`, `qa-tester`)
 2. **Task-level `Task Specialist:`** — per-task override in the plan
 3. **Inference from task content** — file extensions, technology mentions
 
 Specialist agents bring domain expertise that general-purpose agents lack:
-- **rust-developer** — Ownership/borrowing, clippy compliance, unsafe scrutiny, ecosystem patterns
-- **ml-engineer** — Data validation, evaluation rigor, reproducibility, resource management
+- **rust-engineer-local** / **rust-engineer-cloud** — Ownership/borrowing, clippy compliance, unsafe scrutiny, ecosystem patterns (local: mechanical tasks; cloud: complex reasoning)
+- **ml-engineer-local** / **ml-engineer-cloud** — Data validation, evaluation rigor, reproducibility, resource management (local: simple scripts; cloud: architecture)
+- **general-engineer-local** / **general-engineer-cloud** — General implementation (local: mechanical changes; cloud: multi-file integration, debugging)
 - **qa-tester** — Systematic test strategy, edge case mining, anti-pattern detection (mandatory third review stage)
+- **code-reviewer** — Code review against plans and standards
 
 ## Development Conventions
 
@@ -175,7 +185,7 @@ Tests live in the `tests/` directory and verify skill behavior across platforms:
 - **"Human partner"** — Deliberate term for the user (not interchangeable with "the user")
 - **"Skill"** — A markdown file that shapes agent behavior during development
 - **"Subagent"** — A spawned agent instance for parallel task execution
-- **"Specialist Agent"** — A subagent with domain-specific expertise (rust-developer, ml-engineer, qa-tester)
+- **"Specialist Agent"** — A subagent with domain-specific expertise (rust-engineer-local/cloud, ml-engineer-local/cloud, general-engineer-local/cloud, qa-tester, code-reviewer)
 - **"Domain Specialist"** — Plan-level annotation that guides specialist agent dispatch
 - **"Worktree"** — An isolated git workspace for development branches
 - **"Slop"** — Low-quality, agent-generated PRs that will be closed without review
