@@ -6,3 +6,5 @@
 node_modules/
 inspo
 triage/
+in-memoria.db
+logs/*
