@@ -23,4 +23,11 @@ Task tool (superpowers:code-reviewer):
 - Is the implementation following the file structure from the plan?
 - Did this implementation create new files that are already large, or significantly grow existing files? (Don't flag pre-existing file sizes — focus on what this change contributed.)
 
+**Commit message format (enforced — flag non-conforming commits as Critical):**
+- Does the commit message follow `<type>[scope][!]: <description>` format?
+- Is the type from the allowed set: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`, `ci`, `build`, `perf`, `style`?
+- Is the description in imperative mood, no period, max 72 characters?
+- If the task was marked as a breaking change, does the commit have the `!` suffix?
+- If multiple logically separate changes exist in one commit, should they be split?
+
 **Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment

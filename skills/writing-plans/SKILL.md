@@ -42,6 +42,19 @@ This structure informs the task decomposition. Each task should produce self-con
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
+## Domain Specialist Routing
+
+If this plan involves a specialized domain, annotate it so the subagent dispatcher knows which specialist agent to use. Add the `**Domain Specialist:**` field to the plan header (see below).
+
+**When to specify a domain specialist:**
+- **rust-developer** — Implementation is primarily Rust code (systems programming, async services, CLI tools, embedded, FFI, performance-critical code)
+- **ml-engineer** — Implementation involves ML model integration, training pipelines, prompt engineering, evaluation harnesses, data validation, MLOps
+- **qa-tester** — Implementation is primarily test infrastructure, QA tooling, test framework development, or coverage analysis systems
+
+**When NOT to specify:** General application development, web frontends, API backends in common languages (Python web, Node.js, Go, etc.), configuration changes, documentation. These use the standard `general-purpose` implementer.
+
+**Per-task overrides:** If most tasks are general but one task needs a specialist (or vice versa), add `**Task Specialist:** <agent-name>` to that specific task's metadata.
+
 ## Plan Document Header
 
 **Every plan MUST start with this header:**
@@ -57,7 +70,55 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Tech Stack:** [Key technologies/libraries]
 
+**Domain Specialist:** [rust-developer | ml-engineer | qa-tester | (omit if not applicable)]
+
 ---
+```
+
+## Commit Message Format
+
+All commits MUST follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) format. The plan specifies the exact commit message for each task — the implementer executes it verbatim.
+
+**Format:** `<type>[scope][!]: <description>`
+
+**Allowed types:**
+- `feat` — New feature (SemVer MINOR)
+- `fix` — Bug fix (SemVer PATCH)
+- `test` — Test additions or modifications
+- `refactor` — Code refactoring (no behavior change)
+- `docs` — Documentation changes
+- `chore` — Maintenance tasks, build config, tooling
+- `ci` — CI/CD configuration changes
+- `build` — Build system or dependency changes
+- `perf` — Performance improvements
+- `style` — Code style changes (formatting, whitespace, no behavior change)
+
+**Scope:**
+- Each task specifies its scope in the commit message (e.g., `feat(auth):`, `fix(parser):`)
+- Use a single noun that identifies the section of the codebase (no spaces, lowercase)
+- If the task touches multiple unrelated areas, split into separate commits
+
+**Breaking changes:**
+- If a task introduces a breaking change, flag it with `**Breaking Change:** yes` in the task metadata
+- The commit message uses `!` suffix: `feat(api)!: deprecate v1 endpoints`
+- Include a `BREAKING CHANGE:` footer in the commit body when the break isn't obvious from the description
+- The spec should flag breaking changes — if the implementer discovers an unanticipated breaking, they report it and the plan is updated
+
+**Description rules:**
+- Imperative mood ("add" not "added" or "adds")
+- No period at the end
+- Max 72 characters
+- Be specific — "add user login endpoint" not "add feature"
+
+**Example commit messages:**
+```
+feat(auth): add JWT-based login with token refresh
+fix(parser): handle null values in nested JSON objects
+refactor(db): extract connection pooling into dedicated module
+test(index): add edge cases for corrupted index recovery
+feat(api)!: require authentication on all endpoints
+
+BREAKING CHANGE: all API endpoints now require valid auth token
 ```
 
 ## Task Structure
@@ -69,6 +130,12 @@ This structure informs the task decomposition. Each task should produce self-con
 - Create: `exact/path/to/file.py`
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
+
+**Task Specialist:** [rust-developer | ml-engineer | qa-tester | (omit to use plan's Domain Specialist)]
+
+**Commit Scope:** [scope-name]
+
+**Breaking Change:** [yes | (omit)]
 
 - [ ] **Step 1: Write the failing test**
 
@@ -99,7 +166,7 @@ Expected: PASS
 
 ```bash
 git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git commit -m "feat(scope): add specific feature"
 ```
 ````
 
@@ -129,6 +196,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
+**4. Commit message format:** Does each task's Step 5 commit message follow `<type>[scope][!]: <description>` format? Is the type correct? Does the scope match the task? If breaking, is `!` present? Is the description imperative mood, no period, max 72 chars?
+
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
 ## Execution Handoff
@@ -145,7 +214,8 @@ After saving the plan, offer execution choice:
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
-- Fresh subagent per task + two-stage review
+- Fresh subagent per task + three-stage review (spec compliance, code quality, QA/testing)
+- If plan specifies Domain Specialist, that agent is dispatched for implementation tasks
 
 **If Inline Execution chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans

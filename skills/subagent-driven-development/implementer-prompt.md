@@ -32,7 +32,7 @@ Task tool (general-purpose):
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
     3. Verify implementation works
-    4. Commit your work
+    4. Commit your work (see Commit Message Format below)
     5. Self-review (see below)
     6. Report back
 
@@ -40,6 +40,29 @@ Task tool (general-purpose):
 
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
+
+    ## Commit Message Format
+
+    All commits MUST follow the Conventional Commits format:
+
+    ```
+    <type>[scope][!]: <description>
+    ```
+
+    **Types:** `feat` (new feature), `fix` (bug fix), `test` (test changes), `refactor` (refactoring), `docs` (documentation), `chore` (maintenance), `ci` (CI config), `build` (build system), `perf` (performance), `style` (code style, no behavior change)
+
+    **Scope:** Use the scope from the task: [scope-name]
+
+    **Breaking changes:** If the task is marked **Breaking Change: yes**, add `!` after the scope: `feat(scope)!: description`. If you discover an unanticipated breaking change, report it as DONE_WITH_CONCERNS.
+
+    **Description rules:**
+    - Imperative mood: "add" not "added" or "adds"
+    - No period at the end
+    - Max 72 characters
+    - Be specific about what changed
+
+    If the plan provides an exact `git commit -m "..."` command, use it verbatim.
+    If you are generating the commit message yourself, follow the format above.
 
     ## Code Organization
 

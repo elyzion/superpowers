@@ -18,6 +18,10 @@ Task tool (general-purpose):
 
     [From implementer's report]
 
+    ## Commit Message to Verify
+
+    [The commit message from the implementer's report or plan]
+
     ## CRITICAL: Do Not Trust the Report
 
     The implementer finished suspiciously quickly. Their report may be incomplete,
@@ -52,6 +56,13 @@ Task tool (general-purpose):
     - Did they interpret requirements differently than intended?
     - Did they solve the wrong problem?
     - Did they implement the right feature but wrong way?
+
+    **Commit message accuracy:**
+    - Does the commit `<type>` accurately reflect the change? (e.g., is it actually a `feat` or is it a `fix`? Is it `refactor` when behavior actually changed?)
+    - Does the commit scope match what was implemented?
+    - If the change introduces a breaking change, does the commit message have the `!` suffix?
+    - Is the description accurate for what the code actually does?
+    - If the commit message is wrong on any of these, flag it as an issue
 
     **Verify by reading code, not by trusting report.**
 

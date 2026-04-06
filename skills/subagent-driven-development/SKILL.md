@@ -5,11 +5,11 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
+Execute plan by dispatching fresh subagent per task, with three-stage review after each: spec compliance review first, then code quality review, then QA/testing review.
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Core principle:** Fresh subagent per task + three-stage review (spec, quality, QA) = high quality, fast iteration
 
 ## When to Use
 
@@ -34,8 +34,57 @@ digraph when_to_use {
 **vs. Executing Plans (parallel session):**
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
-- Two-stage review after each task: spec compliance first, then code quality
+- Three-stage review after each task: spec compliance first, then code quality, then QA/testing
 - Faster iteration (no human-in-loop between tasks)
+
+## Specialist Agent Selection
+
+Before dispatching an implementer, determine which agent is best suited for the task:
+
+```dot
+digraph specialist_selection {
+    "Read task" [shape=box];
+    "Task has Task Specialist override?" [shape=diamond];
+    "Use plan Domain Specialist" [shape=diamond];
+    "Task involves Rust code?" [shape=diamond];
+    "Task involves ML/AI?" [shape=diamond];
+    "Task is test infrastructure?" [shape=diamond];
+    "Dispatch rust-developer" [shape=box style=filled fillcolor=orange];
+    "Dispatch ml-engineer" [shape=box style=filled fillcolor=purple];
+    "Dispatch qa-tester" [shape=box style=filled fillcolor=green];
+    "Dispatch general-purpose" [shape=box style=filled fillcolor=lightgrey];
+
+    "Read task" -> "Task has Task Specialist override?";
+    "Task has Task Specialist override?" -> "Use plan Domain Specialist" [label="no"];
+    "Task has Task Specialist override?" -> "Dispatch rust-developer" [label="rust-developer"];
+    "Task has Task Specialist override?" -> "Dispatch ml-engineer" [label="ml-engineer"];
+    "Task has Task Specialist override?" -> "Dispatch qa-tester" [label="qa-tester"];
+    "Use plan Domain Specialist" -> "Task involves Rust code?" [label="not set or general"];
+    "Use plan Domain Specialist" -> "Dispatch rust-developer" [label="rust-developer"];
+    "Use plan Domain Specialist" -> "Dispatch ml-engineer" [label="ml-engineer"];
+    "Use plan Domain Specialist" -> "Dispatch qa-tester" [label="qa-tester"];
+    "Task involves Rust code?" -> "Task involves ML/AI?" [label="no"];
+    "Task involves Rust code?" -> "Dispatch rust-developer" [label="yes"];
+    "Task involves ML/AI?" -> "Task is test infrastructure?" [label="no"];
+    "Task involves ML/AI?" -> "Dispatch ml-engineer" [label="yes"];
+    "Task is test infrastructure?" -> "Dispatch general-purpose" [label="no"];
+    "Task is test infrastructure?" -> "Dispatch qa-tester" [label="yes"];
+}
+```
+
+**Priority order:**
+1. **Task-level `Task Specialist:`** — if the task has an explicit override, use it
+2. **Plan-level `Domain Specialist:`** — if the plan header specifies one, use it as the default
+3. **Inference from task content** — if neither is set, infer from the task:
+   - File extensions `.rs`, mentions of `cargo`, `clippy`, `tokio`, `serde` → `rust-developer`
+   - Mentions of models, training, inference, prompts, embeddings, evaluation metrics → `ml-engineer`
+   - Test framework development, coverage tooling, QA systems → `qa-tester`
+   - Everything else → `general-purpose`
+
+**Available specialist agents:**
+- `superpowers:rust-developer` — Rust systems programming (see `./rust-developer-prompt.md`)
+- `superpowers:ml-engineer` — ML/AI pipelines and integration (see `./ml-engineer-prompt.md`)
+- `superpowers:qa-tester` — QA and testing review (see `./qa-tester-prompt.md`)
 
 ## The Process
 
@@ -45,7 +94,7 @@ digraph process {
 
     subgraph cluster_per_task {
         label="Per Task";
-        "Dispatch implementer subagent (./implementer-prompt.md)" [shape=box];
+        "Dispatch implementer subagent (./implementer-prompt.md or specialist)" [shape=box];
         "Implementer subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
@@ -55,6 +104,9 @@ digraph process {
         "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [shape=box];
         "Code quality reviewer subagent approves?" [shape=diamond];
         "Implementer subagent fixes quality issues" [shape=box];
+        "Dispatch QA tester subagent (./qa-tester-prompt.md)" [shape=box];
+        "QA tester subagent approves?" [shape=diamond];
+        "Implementer subagent adds tests/fixes gaps" [shape=box];
         "Mark task complete in TodoWrite" [shape=box];
     }
 
@@ -63,10 +115,10 @@ digraph process {
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
-    "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
+    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md or specialist)";
+    "Dispatch implementer subagent (./implementer-prompt.md or specialist)" -> "Implementer subagent asks questions?";
     "Implementer subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
-    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
+    "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md or specialist)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
     "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
     "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
@@ -76,9 +128,13 @@ digraph process {
     "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
     "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
     "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./code-quality-reviewer-prompt.md)" [label="re-review"];
-    "Code quality reviewer subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
+    "Code quality reviewer subagent approves?" -> "Dispatch QA tester subagent (./qa-tester-prompt.md)" [label="yes"];
+    "Dispatch QA tester subagent (./qa-tester-prompt.md)" -> "QA tester subagent approves?";
+    "QA tester subagent approves?" -> "Implementer subagent adds tests/fixes gaps" [label="no"];
+    "Implementer subagent adds tests/fixes gaps" -> "Dispatch QA tester subagent (./qa-tester-prompt.md)" [label="re-review"];
+    "QA tester subagent approves?" -> "Mark task complete in TodoWrite" [label="yes"];
     "Mark task complete in TodoWrite" -> "More tasks remain?";
-    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
+    "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md or specialist)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
     "Dispatch final code reviewer subagent for entire implementation" -> "Use superpowers:finishing-a-development-branch";
 }
@@ -93,6 +149,11 @@ Use the least powerful model that can handle each role to conserve cost and incr
 **Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
 
 **Architecture, design, and review tasks**: use the most capable available model.
+
+**Specialist agents**: Use a capable model. Specialist domains (Rust ownership reasoning, ML architecture decisions, test strategy) benefit from stronger reasoning.
+- `rust-developer`: Capable model (ownership/borrower reasoning, lifetime analysis)
+- `ml-engineer`: Capable model (architecture reasoning, evaluation methodology)
+- `qa-tester`: Standard model (systematic analysis, pattern matching)
 
 **Task complexity signals:**
 - Touches 1-2 files with a complete spec → cheap model
@@ -119,9 +180,15 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 ## Prompt Templates
 
-- `./implementer-prompt.md` - Dispatch implementer subagent
+**Implementer templates:**
+- `./implementer-prompt.md` - Dispatch general-purpose implementer subagent
+- `./rust-developer-prompt.md` - Dispatch rust-developer specialist subagent
+- `./ml-engineer-prompt.md` - Dispatch ml-engineer specialist subagent
+
+**Review templates:**
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
 - `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+- `./qa-tester-prompt.md` - Dispatch QA/testing reviewer subagent (mandatory third review stage)
 
 ## Example Workflow
 
@@ -130,12 +197,14 @@ You: I'm using Subagent-Driven Development to execute this plan.
 
 [Read plan file once: docs/superpowers/plans/feature-plan.md]
 [Extract all 5 tasks with full text and context]
+[Note plan Domain Specialist: rust-developer]
 [Create TodoWrite with all tasks]
 
-Task 1: Hook installation script
+Task 1: Hook installation script (Rust)
 
 [Get Task 1 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Plan Domain Specialist is rust-developer → dispatch rust-developer subagent]
+[Dispatch with full task text + context + rust-developer-prompt.md]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 
@@ -143,8 +212,8 @@ You: "User level (~/.config/superpowers/hooks/)"
 
 Implementer: "Got it. Implementing now..."
 [Later] Implementer:
-  - Implemented install-hook command
-  - Added tests, 5/5 passing
+  - Implemented install-hook command in Rust
+  - cargo test: 5/5 passing, cargo clippy: clean
   - Self-review: Found I missed --force flag, added it
   - Committed
 
@@ -152,19 +221,23 @@ Implementer: "Got it. Implementing now..."
 Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 
 [Get git SHAs, dispatch code quality reviewer]
-Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
+Code reviewer: Strengths: Good test coverage, clean error handling. Issues: None. Approved.
+
+[Dispatch QA tester — SCOPE: LIGHT (internal CLI tool)]
+QA tester: ✅ Adequate test coverage for the changed code. PASS.
 
 [Mark Task 1 complete]
 
 Task 2: Recovery modes
 
 [Get Task 2 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[No specialist override — plan Domain Specialist is rust-developer → dispatch rust-developer]
+[Dispatch with full task text + context]
 
 Implementer: [No questions, proceeds]
 Implementer:
   - Added verify/repair modes
-  - 8/8 tests passing
+  - 8/8 tests passing, clippy clean
   - Self-review: All good
   - Committed
 
@@ -188,6 +261,20 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
 
+[Dispatch QA tester — SCOPE: FULL (user-facing recovery feature)]
+QA tester: Edge Cases Without Tests:
+  - Missing: Recovery when index file is corrupted mid-scan
+  - Missing: Behavior when index is empty
+  Required Additions:
+  - test_recovery_from_corrupted_index
+  - test_empty_index_returns_gracefully
+
+[Implementer adds tests]
+Implementer: Added both tests, all passing
+
+[QA tester reviews again]
+QA tester: ✅ PASS — Adequate test coverage now.
+
 [Mark Task 2 complete]
 
 ...
@@ -206,6 +293,7 @@ Done!
 - Fresh context per task (no confusion)
 - Parallel-safe (subagents don't interfere)
 - Subagent can ask questions (before AND during work)
+- Specialist agents bring domain expertise (Rust ownership, ML evaluation, test strategy)
 
 **vs. Executing Plans:**
 - Same session (no handoff)
@@ -217,25 +305,29 @@ Done!
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
+- Smart-scoped QA review: LIGHT for refactoring, FULL for user-facing features
 
 **Quality gates:**
 - Self-review catches issues before handoff
-- Two-stage review: spec compliance, then code quality
+- Three-stage review: spec compliance, code quality, QA/testing
 - Review loops ensure fixes actually work
 - Spec compliance prevents over/under-building
 - Code quality ensures implementation is well-built
+- QA review ensures adequate test coverage and catches edge cases
+- Specialist agents bring domain-specific expertise to implementation
 
 **Cost:**
-- More subagent invocations (implementer + 2 reviewers per task)
-- Controller does more prep work (extracting all tasks upfront)
+- More subagent invocations (implementer + 3 reviewers per task)
+- Controller does more prep work (extracting all tasks upfront, specialist routing)
 - Review loops add iterations
 - But catches issues early (cheaper than debugging later)
+- QA LIGHT scope minimizes overhead on non-user-facing tasks
 
 ## Red Flags
 
 **Never:**
 - Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality)
+- Skip reviews (spec compliance, code quality, OR QA/testing)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
@@ -245,7 +337,9 @@ Done!
 - Skip review loops (reviewer found issues = implementer fixes = review again)
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
-- Move to next task while either review has open issues
+- **Start QA review before code quality is ✅** (wrong order)
+- Move to next task while any review has open issues
+- Skip specialist routing — always check for Domain Specialist/Task Specialist before dispatching general-purpose
 
 **If subagent asks questions:**
 - Answer clearly and completely
@@ -266,12 +360,17 @@ Done!
 
 **Required workflow skills:**
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
+- **superpowers:writing-plans** - Creates the plan this skill executes (includes Domain Specialist annotation)
 - **superpowers:requesting-code-review** - Code review template for reviewer subagents
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
+
+**Specialist agents (dispatched when plan specifies domain):**
+- **superpowers:rust-developer** - Rust systems programming implementation
+- **superpowers:ml-engineer** - ML/AI pipeline implementation
+- **superpowers:qa-tester** - QA/testing review (mandatory third review stage)
 
 **Alternative workflow:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
