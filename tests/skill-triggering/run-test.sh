@@ -44,12 +44,12 @@ LOG_FILE="$OUTPUT_DIR/claude-output.json"
 cd "$OUTPUT_DIR"
 
 echo "Plugin dir: $PLUGIN_DIR"
-echo "Running claude -p with naive prompt..."
-timeout 300 claude -p "$PROMPT" \
+echo "Running qwen with naive prompt..."
+timeout 300 qwen "$PROMPT" \
     --plugin-dir "$PLUGIN_DIR" \
-    --dangerously-skip-permissions \
+    -y \
     --max-turns "$MAX_TURNS" \
-    --output-format stream-json \
+    -o stream-json \
     > "$LOG_FILE" 2>&1 || true
 
 echo ""
