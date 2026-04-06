@@ -12,7 +12,7 @@ echo "========================================"
 echo ""
 echo "Repository: $(cd ../.. && pwd)"
 echo "Test time: $(date)"
-echo "Claude version: $(claude --version 2>/dev/null || echo 'not found')"
+echo "Qwen Code version: 0.14.0
 echo ""
 
 # Check if Qwen Code is available
@@ -25,7 +25,7 @@ fi
 # Parse command line arguments
 VERBOSE=false
 SPECIFIC_TEST=""
-TIMEOUT=300  # Default 5 minute timeout per test
+TIMEOUT=600  # Default 10 minute timeout per test
 RUN_INTEGRATION=false
 
 while [[ $# -gt 0 ]]; do

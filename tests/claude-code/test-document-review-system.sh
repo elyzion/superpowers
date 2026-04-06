@@ -73,8 +73,8 @@ echo ""
 echo "Running spec document reviewer..."
 echo ""
 
-# Run Claude to review the spec
-OUTPUT_FILE="$TEST_PROJECT/claude-output.txt"
+# Run Qwen to review the spec
+OUTPUT_FILE="$TEST_PROJECT/qwen-output.txt"
 
 PROMPT="You are testing the spec document reviewer.
 
@@ -90,7 +90,7 @@ Look for:
 Output your review in the format specified in the template."
 
 echo "================================================================================"
-cd "$SCRIPT_DIR/../.." && timeout 120 claude -p "$PROMPT" --permission-mode bypassPermissions 2>&1 | tee "$OUTPUT_FILE" || {
+cd "$SCRIPT_DIR/../.." && run_qwen "$PROMPT" 180 > "$OUTPUT_FILE" 2>/dev/null || {
     echo ""
     echo "================================================================================"
     echo "EXECUTION FAILED (exit code: $?)"

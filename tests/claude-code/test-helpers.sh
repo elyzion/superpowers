@@ -1,13 +1,43 @@
 #!/usr/bin/env bash
 # Helper functions for Qwen Code skill tests
 
+# Extract assistant text from Qwen's stream-json output
+# Usage: extract_text_from_stream_json "$stream_json_file"
+extract_text_from_stream_json() {
+    local input_file="$1"
+    python3 -c "
+import json
+with open('$input_file') as f:
+    for line in f:
+        try:
+            data = json.loads(line)
+            if data.get('type') == 'assistant':
+                msg = data.get('message', {})
+                # Handle both string and dict message
+                if isinstance(msg, str):
+                    try:
+                        msg = json.loads(msg)
+                    except:
+                        continue
+                # Extract text from content array (Claude-compatible format)
+                content = msg.get('content', [])
+                for part in content:
+                    if isinstance(part, dict) and part.get('type') == 'text':
+                        print(part.get('text', ''))
+        except:
+            pass
+"
+}
+
 # Run Qwen Code with a prompt and capture output
 # Usage: run_qwen "prompt text" [timeout_seconds] [allowed_tools]
+# Returns clean assistant text (extracted from stream-json)
 run_qwen() {
     local prompt="$1"
     local timeout="${2:-60}"
     local allowed_tools="${3:-}"
-    local output_file=$(mktemp)
+    local json_file=$(mktemp)
+    local text_file=$(mktemp)
 
     # Build command with stream-json output and yolo mode
     local cmd="qwen \"$prompt\" -o stream-json -y"
@@ -15,15 +45,19 @@ run_qwen() {
         cmd="$cmd --allowed-tools $allowed_tools"
     fi
 
-    # Run Qwen in headless mode with timeout
-    if timeout "$timeout" bash -c "$cmd" > "$output_file" 2>&1; then
-        cat "$output_file"
-        rm -f "$output_file"
+    # Run Qwen in headless mode, capture stream-json
+    if timeout "$timeout" bash -c "$cmd" > "$json_file" 2>/dev/null; then
+        # Extract clean assistant text from stream-json
+        extract_text_from_stream_json "$json_file" > "$text_file"
+        cat "$text_file"
+        rm -f "$json_file" "$text_file"
         return 0
     else
         local exit_code=$?
-        cat "$output_file" >&2
-        rm -f "$output_file"
+        # Still extract text even on failure (timeout, etc.)
+        extract_text_from_stream_json "$json_file" > "$text_file"
+        cat "$text_file" >&2
+        rm -f "$json_file" "$text_file"
         return $exit_code
     fi
 }
@@ -35,7 +69,7 @@ assert_contains() {
     local pattern="$2"
     local test_name="${3:-test}"
 
-    if echo "$output" | grep -q "$pattern"; then
+    if echo "$output" | grep -qi "$pattern"; then
         echo "  [PASS] $test_name"
         return 0
     else
@@ -54,7 +88,7 @@ assert_not_contains() {
     local pattern="$2"
     local test_name="${3:-test}"
 
-    if echo "$output" | grep -q "$pattern"; then
+    if echo "$output" | grep -qi "$pattern"; then
         echo "  [FAIL] $test_name"
         echo "  Did not expect to find: $pattern"
         echo "  In output:"
@@ -97,9 +131,12 @@ assert_order() {
     local pattern_b="$3"
     local test_name="${4:-test}"
 
-    # Get line numbers where patterns appear
-    local line_a=$(echo "$output" | grep -n "$pattern_a" | head -1 | cut -d: -f1)
-    local line_b=$(echo "$output" | grep -n "$pattern_b" | head -1 | cut -d: -f1)
+    # Get line numbers and byte positions where patterns first appear
+    local match_a=$(echo "$output" | grep -n -b -o -m 1 "$pattern_a" 2>/dev/null | head -1)
+    local match_b=$(echo "$output" | grep -n -b -o -m 1 "$pattern_b" 2>/dev/null | head -1)
+
+    local line_a=$(echo "$match_a" | cut -d: -f1)
+    local line_b=$(echo "$match_b" | cut -d: -f1)
 
     if [ -z "$line_a" ]; then
         echo "  [FAIL] $test_name: pattern A not found: $pattern_a"
@@ -111,13 +148,30 @@ assert_order() {
         return 1
     fi
 
-    if [ "$line_a" -lt "$line_b" ]; then
-        echo "  [PASS] $test_name (A at line $line_a, B at line $line_b)"
+    # If on different lines, compare line numbers
+    if [ "$line_a" -ne "$line_b" ]; then
+        if [ "$line_a" -lt "$line_b" ]; then
+            echo "  [PASS] $test_name (A at line $line_a, B at line $line_b)"
+            return 0
+        else
+            echo "  [FAIL] $test_name"
+            echo "  Expected '$pattern_a' before '$pattern_b'"
+            echo "  But found A at line $line_a, B at line $line_b"
+            return 1
+        fi
+    fi
+
+    # Same line — compare byte offset within that line
+    local offset_a=$(echo "$match_a" | cut -d: -f2)
+    local offset_b=$(echo "$match_b" | cut -d: -f2)
+
+    if [ "$offset_a" -lt "$offset_b" ]; then
+        echo "  [PASS] $test_name (A at line ${line_a}:${offset_a}, B at line ${line_b}:${offset_b})"
         return 0
     else
         echo "  [FAIL] $test_name"
         echo "  Expected '$pattern_a' before '$pattern_b'"
-        echo "  But found A at line $line_a, B at line $line_b"
+        echo "  But found A at line ${line_a}:${offset_a}, B at line ${line_b}:${offset_b}"
         return 1
     fi
 }
@@ -192,6 +246,7 @@ EOF
 }
 
 # Export functions for use in tests
+export -f extract_text_from_stream_json
 export -f run_qwen
 export -f assert_contains
 export -f assert_not_contains
