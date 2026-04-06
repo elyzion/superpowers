@@ -41,50 +41,26 @@ digraph when_to_use {
 
 Before dispatching an implementer, determine which agent is best suited for the task:
 
-```dot
-digraph specialist_selection {
-    "Read task" [shape=box];
-    "Task has Task Specialist override?" [shape=diamond];
-    "Use plan Domain Specialist" [shape=diamond];
-    "Task involves Rust code?" [shape=diamond];
-    "Task involves ML/AI?" [shape=diamond];
-    "Task is test infrastructure?" [shape=diamond];
-    "Dispatch rust-developer" [shape=box style=filled fillcolor=orange];
-    "Dispatch ml-engineer" [shape=box style=filled fillcolor=purple];
-    "Dispatch qa-tester" [shape=box style=filled fillcolor=green];
-    "Dispatch general-purpose" [shape=box style=filled fillcolor=lightgrey];
-
-    "Read task" -> "Task has Task Specialist override?";
-    "Task has Task Specialist override?" -> "Use plan Domain Specialist" [label="no"];
-    "Task has Task Specialist override?" -> "Dispatch rust-developer" [label="rust-developer"];
-    "Task has Task Specialist override?" -> "Dispatch ml-engineer" [label="ml-engineer"];
-    "Task has Task Specialist override?" -> "Dispatch qa-tester" [label="qa-tester"];
-    "Use plan Domain Specialist" -> "Task involves Rust code?" [label="not set or general"];
-    "Use plan Domain Specialist" -> "Dispatch rust-developer" [label="rust-developer"];
-    "Use plan Domain Specialist" -> "Dispatch ml-engineer" [label="ml-engineer"];
-    "Use plan Domain Specialist" -> "Dispatch qa-tester" [label="qa-tester"];
-    "Task involves Rust code?" -> "Task involves ML/AI?" [label="no"];
-    "Task involves Rust code?" -> "Dispatch rust-developer" [label="yes"];
-    "Task involves ML/AI?" -> "Task is test infrastructure?" [label="no"];
-    "Task involves ML/AI?" -> "Dispatch ml-engineer" [label="yes"];
-    "Task is test infrastructure?" -> "Dispatch general-purpose" [label="no"];
-    "Task is test infrastructure?" -> "Dispatch qa-tester" [label="yes"];
-}
-```
-
 **Priority order:**
-1. **Task-level `Task Specialist:`** — if the task has an explicit override, use it
-2. **Plan-level `Domain Specialist:`** — if the plan header specifies one, use it as the default
+1. **Task-level `Task Specialist:`** — if the task has an explicit override, use it. Valid values: `rust-engineer-local`, `rust-engineer-cloud`, `ml-engineer-local`, `ml-engineer-cloud`, `general-engineer-local`, `general-engineer-cloud`, `qa-tester`, `code-reviewer`.
+2. **Plan-level `Domain Specialist:`** — if the plan header specifies one, use it as the default.
 3. **Inference from task content** — if neither is set, infer from the task:
-   - File extensions `.rs`, mentions of `cargo`, `clippy`, `tokio`, `serde` → `rust-developer`
-   - Mentions of models, training, inference, prompts, embeddings, evaluation metrics → `ml-engineer`
+   - File extensions `.rs`, mentions of `cargo`, `clippy`, `tokio`, `serde` → `rust-engineer-local` for mechanical changes, `rust-engineer-cloud` for complex reasoning
+   - Mentions of models, training, inference, prompts, embeddings, evaluation metrics → `ml-engineer-local` for simple scripts, `ml-engineer-cloud` for architecture
    - Test framework development, coverage tooling, QA systems → `qa-tester`
-   - Everything else → `general-purpose`
+   - Single-file edits, boilerplate, straightforward refactoring, CSS/HTML → `general-engineer-local`
+   - Multi-file integration, architecture decisions, debugging → `general-engineer-cloud`
+   - Everything else → `general-engineer-local`
 
 **Available specialist agents:**
-- `superpowers:rust-developer` — Rust systems programming (see `./rust-developer-prompt.md`)
-- `superpowers:ml-engineer` — ML/AI pipelines and integration (see `./ml-engineer-prompt.md`)
-- `superpowers:qa-tester` — QA and testing review (see `./qa-tester-prompt.md`)
+- `superpowers:rust-engineer-local` — Mechanical Rust implementation (see `./rust-engineer-local.md`)
+- `superpowers:rust-engineer-cloud` — Complex Rust reasoning (see `./rust-engineer-cloud.md`)
+- `superpowers:ml-engineer-local` — Simple ML implementation (see `./ml-engineer-local.md`)
+- `superpowers:ml-engineer-cloud` — ML architecture (see `./ml-engineer-cloud.md`)
+- `superpowers:general-engineer-local` — Mechanical general implementation (see `./general-engineer-local.md`)
+- `superpowers:general-engineer-cloud` — Complex general implementation (see `./general-engineer-cloud.md`)
+- `superpowers:qa-tester` — QA/testing review (see `./qa-tester.md`)
+- `superpowers:code-reviewer` — Code review (see `./code-reviewer.md`)
 
 ## The Process
 
@@ -142,23 +118,21 @@ digraph process {
 
 ## Model Selection
 
-Use the least powerful model that can handle each role to conserve cost and increase speed.
+Model tier is determined by the agent variant. Local agents run on qwen3.5:9b via Ollama. Cloud agents inherit the session's default model (typically a cloud model via Qwen OAuth).
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
+**Local agents** (qwen3.5:9b via Ollama):
+- 16k context window — tasks must be scoped accordingly
+- Best for: mechanical, well-specified tasks with clear input/output
+- Encourages concise, focused output
+- No API cost, no rate limits, private
 
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
+**Cloud agents** (session default, typically qwen-plus via Qwen OAuth):
+- Full context window
+- Best for: tasks requiring judgment, reasoning breadth, or design decisions
+- 1000 requests/day free quota — monitor usage
 
-**Architecture, design, and review tasks**: use the most capable available model.
-
-**Specialist agents**: Use a capable model. Specialist domains (Rust ownership reasoning, ML architecture decisions, test strategy) benefit from stronger reasoning.
-- `rust-developer`: Capable model (ownership/borrower reasoning, lifetime analysis)
-- `ml-engineer`: Capable model (architecture reasoning, evaluation methodology)
-- `qa-tester`: Standard model (systematic analysis, pattern matching)
-
-**Task complexity signals:**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
+**Review agents** (qa-tester, code-reviewer):
+- Always cloud — review quality benefits most from strong reasoning
 
 ## Handling Implementer Status
 
@@ -181,9 +155,9 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 ## Prompt Templates
 
 **Implementer templates:**
-- `./implementer-prompt.md` - Dispatch general-purpose implementer subagent
-- `./rust-developer-prompt.md` - Dispatch rust-developer specialist subagent
-- `./ml-engineer-prompt.md` - Dispatch ml-engineer specialist subagent
+- `./implementer-prompt.md` - Dispatch implementer subagent
+- `./rust-developer-prompt.md` - Dispatch Rust specialist subagent (for specialist routing)
+- `./ml-engineer-prompt.md` - Dispatch ML specialist subagent (for specialist routing)
 
 **Review templates:**
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
@@ -197,14 +171,14 @@ You: I'm using Subagent-Driven Development to execute this plan.
 
 [Read plan file once: docs/superpowers/plans/feature-plan.md]
 [Extract all 5 tasks with full text and context]
-[Note plan Domain Specialist: rust-developer]
+[Note plan Domain Specialist: rust-engineer-cloud]
 [Create TodoWrite with all tasks]
 
 Task 1: Hook installation script (Rust)
 
 [Get Task 1 text and context (already extracted)]
-[Plan Domain Specialist is rust-developer → dispatch rust-developer subagent]
-[Dispatch with full task text + context + rust-developer-prompt.md]
+[Plan Domain Specialist is rust-engineer-cloud → dispatch rust-engineer-cloud subagent]
+[Dispatch with full task text + context + rust-engineer-cloud.md]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 
@@ -231,7 +205,7 @@ QA tester: ✅ Adequate test coverage for the changed code. PASS.
 Task 2: Recovery modes
 
 [Get Task 2 text and context (already extracted)]
-[No specialist override — plan Domain Specialist is rust-developer → dispatch rust-developer]
+[No specialist override — plan Domain Specialist is rust-engineer-cloud → dispatch rust-engineer-cloud]
 [Dispatch with full task text + context]
 
 Implementer: [No questions, proceeds]
@@ -339,7 +313,7 @@ Done!
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - **Start QA review before code quality is ✅** (wrong order)
 - Move to next task while any review has open issues
-- Skip specialist routing — always check for Domain Specialist/Task Specialist before dispatching general-purpose
+- Skip specialist routing — always check for Domain Specialist/Task Specialist before dispatching general-engineer-local
 
 **If subagent asks questions:**
 - Answer clearly and completely
@@ -368,9 +342,14 @@ Done!
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 
 **Specialist agents (dispatched when plan specifies domain):**
-- **superpowers:rust-developer** - Rust systems programming implementation
-- **superpowers:ml-engineer** - ML/AI pipeline implementation
+- **superpowers:rust-engineer-local** - Mechanical Rust implementation
+- **superpowers:rust-engineer-cloud** - Complex Rust reasoning
+- **superpowers:ml-engineer-local** - Simple ML implementation
+- **superpowers:ml-engineer-cloud** - ML architecture
+- **superpowers:general-engineer-local** - Mechanical general implementation
+- **superpowers:general-engineer-cloud** - Complex general implementation
 - **superpowers:qa-tester** - QA/testing review (mandatory third review stage)
+- **superpowers:code-reviewer** - Code review
 
 **Alternative workflow:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
