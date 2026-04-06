@@ -46,14 +46,22 @@ This structure informs the task decomposition. Each task should produce self-con
 
 If this plan involves a specialized domain, annotate it so the subagent dispatcher knows which specialist agent to use. Add the `**Domain Specialist:**` field to the plan header (see below).
 
+**Valid Domain Specialist values:**
+
+- **rust-engineer-local** — Mechanical Rust changes: derive macros, boilerplate, simple trait impls, clippy fixes
+- **rust-engineer-cloud** — Complex Rust: lifetime reasoning, async architecture, FFI design, performance-critical patterns
+- **ml-engineer-local** — Simple ML: data loading scripts, preprocessing pipelines, basic evaluation
+- **ml-engineer-cloud** — ML architecture: model selection, evaluation methodology, prompt engineering, data validation design
+- **general-engineer-local** — Mechanical changes: single-file edits, boilerplate, refactoring with clear spec, CSS/HTML updates
+- **general-engineer-cloud** — Multi-file integration, architecture decisions, debugging, complex error analysis
+- **qa-tester** — Test strategy, coverage analysis, edge case design (cloud only)
+- **code-reviewer** — Code review against plans (cloud only)
+
 **When to specify a domain specialist:**
-- **rust-developer** — Implementation is primarily Rust code (systems programming, async services, CLI tools, embedded, FFI, performance-critical code)
-- **ml-engineer** — Implementation involves ML model integration, training pipelines, prompt engineering, evaluation harnesses, data validation, MLOps
-- **qa-tester** — Implementation is primarily test infrastructure, QA tooling, test framework development, or coverage analysis systems
 
-**When NOT to specify:** General application development, web frontends, API backends in common languages (Python web, Node.js, Go, etc.), configuration changes, documentation. These use the standard `general-purpose` implementer.
+Choose the variant that matches the reasoning needs of the task. Local variants run on constrained models (16k context) and are suited for mechanical, well-scoped work. Cloud variants run on the session's default model and handle complex reasoning, multi-file coordination, and design decisions.
 
-**Per-task overrides:** If most tasks are general but one task needs a specialist (or vice versa), add `**Task Specialist:** <agent-name>` to that specific task's metadata.
+**Per-task overrides:** If most tasks are general but one task needs a specialist (or vice versa), add `**Task Specialist:** <agent-name>` to that specific task's metadata. Use any of the valid values listed above.
 
 ## Plan Document Header
 
@@ -70,7 +78,10 @@ If this plan involves a specialized domain, annotate it so the subagent dispatch
 
 **Tech Stack:** [Key technologies/libraries]
 
-**Domain Specialist:** [rust-developer | ml-engineer | qa-tester | (omit if not applicable)]
+**Domain Specialist:** [rust-engineer-local | rust-engineer-cloud |
+  ml-engineer-local | ml-engineer-cloud |
+  general-engineer-local | general-engineer-cloud |
+  qa-tester | code-reviewer | (omit if not applicable)]
 
 ---
 ```
@@ -131,7 +142,10 @@ BREAKING CHANGE: all API endpoints now require valid auth token
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
 
-**Task Specialist:** [rust-developer | ml-engineer | qa-tester | (omit to use plan's Domain Specialist)]
+**Task Specialist:** [rust-engineer-local | rust-engineer-cloud |
+  ml-engineer-local | ml-engineer-cloud |
+  general-engineer-local | general-engineer-cloud |
+  qa-tester | code-reviewer | (omit to use plan's Domain Specialist)]
 
 **Commit Scope:** [scope-name]
 
