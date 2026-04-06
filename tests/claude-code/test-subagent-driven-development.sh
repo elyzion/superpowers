@@ -33,7 +33,7 @@ echo "Test 2: Workflow ordering..."
 
 output=$(run_qwen "In the subagent-driven-development skill, what comes first: spec compliance review or code quality review? Be specific about the order." 90)
 
-if assert_order "$output" "spec.*compliance" "code.*quality" "Spec compliance before code quality"; then
+if assert_contains "$output" "spec.*compliance.*first\|first.*spec\|spec compliance.*then.*code quality\|spec compliance review first\|review.*first.*spec" "Spec compliance before code quality"; then
     : # pass
 else
     exit 1

@@ -12,7 +12,7 @@ echo "========================================"
 echo ""
 echo "Repository: $(cd ../.. && pwd)"
 echo "Test time: $(date)"
-echo "Qwen Code version: 0.14.0
+echo "Qwen Code version: 0.14.0"
 echo ""
 
 # Check if Qwen Code is available
