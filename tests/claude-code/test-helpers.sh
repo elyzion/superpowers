@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Helper functions for Claude Code skill tests
+# Helper functions for Qwen Code skill tests
 
-# Run Claude Code with a prompt and capture output
-# Usage: run_claude "prompt text" [timeout_seconds] [allowed_tools]
-run_claude() {
+# Run Qwen Code with a prompt and capture output
+# Usage: run_qwen "prompt text" [timeout_seconds] [allowed_tools]
+run_qwen() {
     local prompt="$1"
     local timeout="${2:-60}"
     local allowed_tools="${3:-}"
     local output_file=$(mktemp)
 
-    # Build command
-    local cmd="claude -p \"$prompt\""
+    # Build command with stream-json output and yolo mode
+    local cmd="qwen \"$prompt\" -o stream-json -y"
     if [ -n "$allowed_tools" ]; then
-        cmd="$cmd --allowed-tools=$allowed_tools"
+        cmd="$cmd --allowed-tools $allowed_tools"
     fi
 
-    # Run Claude in headless mode with timeout
+    # Run Qwen in headless mode with timeout
     if timeout "$timeout" bash -c "$cmd" > "$output_file" 2>&1; then
         cat "$output_file"
         rm -f "$output_file"
@@ -192,7 +192,7 @@ EOF
 }
 
 # Export functions for use in tests
-export -f run_claude
+export -f run_qwen
 export -f assert_contains
 export -f assert_not_contains
 export -f assert_count
