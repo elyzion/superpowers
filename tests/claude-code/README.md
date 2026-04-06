@@ -1,14 +1,14 @@
-# Claude Code Skills Tests
+# Qwen Code Skills Tests
 
-Automated tests for superpowers skills using Claude Code CLI.
+Automated tests for superpowers skills using Qwen Code CLI.
 
 ## Overview
 
-This test suite verifies that skills are loaded correctly and Claude follows them as expected. Tests invoke Claude Code in headless mode (`claude -p`) and verify the behavior.
+This test suite verifies that skills are loaded correctly and Claude follows them as expected. Tests invoke Qwen Code in headless mode (`qwen`) and verify the behavior.
 
 ## Requirements
 
-- Claude Code CLI installed and in PATH (`claude --version` should work)
+- Qwen Code CLI installed and in PATH (`claude --version` should work)
 - Local superpowers plugin installed (see main README for installation)
 
 ## Running Tests
@@ -54,7 +54,7 @@ Common functions for skills testing:
 
 Each test file:
 1. Sources `test-helpers.sh`
-2. Runs Claude Code with specific prompts
+2. Runs Qwen Code with specific prompts
 3. Verifies expected behavior using assertions
 4. Returns 0 on success, non-zero on failure
 
@@ -126,7 +126,7 @@ Full workflow execution test (~10-30 minutes):
 ## Timeout Considerations
 
 - Default timeout: 5 minutes per test
-- Claude Code may take time to respond
+- Qwen Code may take time to respond
 - Adjust with `--timeout` if needed
 - Tests should be focused to avoid long runs
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Test runner for Claude Code skills
-# Tests skills by invoking Claude Code CLI and verifying behavior
+# Test runner for Qwen Code skills
+# Tests skills by invoking Qwen Code CLI and verifying behavior
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo "========================================"
-echo " Claude Code Skills Test Suite"
+echo " Qwen Code Skills Test Suite"
 echo "========================================"
 echo ""
 echo "Repository: $(cd ../.. && pwd)"
@@ -15,10 +15,10 @@ echo "Test time: $(date)"
 echo "Claude version: $(claude --version 2>/dev/null || echo 'not found')"
 echo ""
 
-# Check if Claude Code is available
-if ! command -v claude &> /dev/null; then
-    echo "ERROR: Claude Code CLI not found"
-    echo "Install Claude Code first: https://code.claude.com"
+# Check if Qwen Code is available
+if ! command -v qwen &> /dev/null; then
+    echo "ERROR: Qwen Code CLI not found"
+    echo "Install Qwen Code first: https://code.claude.com"
     exit 1
 fi
 

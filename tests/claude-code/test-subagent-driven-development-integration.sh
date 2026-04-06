@@ -162,9 +162,9 @@ echo "Execution complete. Analyzing results..."
 echo ""
 
 # Find the session transcript
-# Session files are in ~/.claude/projects/-<working-dir>/<session-id>.jsonl
+# Session files are in ~/.qwen/projects/-<working-dir>/<session-id>.jsonl
 WORKING_DIR_ESCAPED=$(echo "$SCRIPT_DIR/../.." | sed 's/\//-/g' | sed 's/^-//')
-SESSION_DIR="$HOME/.claude/projects/$WORKING_DIR_ESCAPED"
+SESSION_DIR="$HOME/.qwen/projects/$WORKING_DIR_ESCAPED"
 
 # Find the most recent session file (created during this test run)
 SESSION_FILE=$(find "$SESSION_DIR" -name "*.jsonl" -type f -mmin -60 2>/dev/null | sort -r | head -1)
