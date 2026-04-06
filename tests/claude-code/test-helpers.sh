@@ -46,6 +46,7 @@ run_qwen() {
     fi
 
     # Run Qwen in headless mode, capture stream-json
+    sleep 3  # Rate limit protection - don't hammer the API
     if timeout "$timeout" bash -c "$cmd" > "$json_file" 2>/dev/null; then
         # Extract clean assistant text from stream-json
         extract_text_from_stream_json "$json_file" > "$text_file"
