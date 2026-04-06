@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Integration Test: Document Review System
 # Actually runs spec/plan review and verifies reviewers catch issues
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/test-helpers.sh"

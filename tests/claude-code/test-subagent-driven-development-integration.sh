@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Integration Test: subagent-driven-development workflow
 # Actually executes a plan and verifies the new workflow behaviors
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/test-helpers.sh"
