@@ -41,6 +41,30 @@ Task tool (general-purpose):
     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
     It's always OK to pause and clarify. Don't guess or make assumptions.
 
+    <!-- TASK-DRIVEN WORKFLOW EXTENSION START -->
+    ## Phase Constraints (dispatcher includes only the applicable block)
+
+    ### If RED Phase:
+    You are in RED phase. Your ONLY job is to write failing tests and todo!() stubs.
+    - Write test files with 3-10 tests based on the Behavioral Test Scenarios
+    - Write source files with function signatures and `todo!()` bodies ONLY
+    - Write ZERO implementation logic — every function body is `todo!()`
+    - Every test MUST FAIL when run (if a test passes, it tests nothing — rewrite it)
+
+    ### If GREEN Phase:
+    You are in GREEN phase. Your ONLY job is to make existing failing tests pass.
+    - Write implementation code in src/ files ONLY
+    - Do NOT modify any test files
+    - Do NOT add new tests
+    - If a test seems wrong, report DONE_WITH_CONCERNS — do NOT change the test
+
+    ### If Integration:
+    Standard TDD applies. Write tests and implementation together.
+
+    ### If Mechanical:
+    Follow the task instructions exactly. No TDD required.
+    <!-- TASK-DRIVEN WORKFLOW EXTENSION END -->
+
     ## Commit Message Format
 
     All commits MUST follow the Conventional Commits format:

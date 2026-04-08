@@ -62,6 +62,42 @@ Before dispatching an implementer, determine which agent is best suited for the 
 - `superpowers:qa-tester` — QA/testing review (see `./qa-tester.md`)
 - `superpowers:code-reviewer` — Code review (see `./code-reviewer.md`)
 
+<!-- TASK-DRIVEN WORKFLOW EXTENSION START -->
+## Task File Phase Detection
+
+When the task source is a pre-scoped task file (a markdown file with `Task Type:` and
+`Phase:` metadata fields), detect the task type and phase to enforce structural constraints:
+
+**Task Type detection:**
+- `Task Type: Contract` + `Phase: RED` → inject RED phase constraints into implementer prompt
+- `Task Type: Contract` + `Phase: GREEN` → inject GREEN phase constraints into implementer prompt
+- `Task Type: Integration` → standard TDD (tests + implementation together)
+- `Task Type: Mechanical` → no TDD required, follow instructions exactly
+
+**Phase constraint injection:**
+When dispatching the implementer subagent, announce the configuration as a status line
+(the user already confirmed during brainstorming short-circuit — do not block here):
+
+> "Dispatching [Task Specialist] for [task ID] — [Task Type], [Phase] phase. Proceeding."
+
+Include the appropriate phase constraint block
+from `./implementer-prompt.md § Phase Constraints`. This REPLACES the generic TDD instruction —
+phase constraints are structural, not aspirational.
+
+**Verification responsibility:**
+After the implementer reports DONE, verify phase compliance before proceeding to review:
+- RED: Run the project's test command. All tests must FAIL. `git diff --name-only` must show only test files + stub files.
+- GREEN: Run the project's test command. All previously-failing tests must PASS. `git diff --name-only` must show NO test file changes.
+
+If verification fails, re-dispatch with specific correction instructions. Do NOT proceed to review.
+
+## Auto-Pick from SEQUENCE.md
+
+If no specific task is provided, look for a SEQUENCE.md file in the project's milestone
+directory structure to find the first ⬜ task whose dependencies are all ✅. Present it
+to the user for confirmation before proceeding.
+<!-- TASK-DRIVEN WORKFLOW EXTENSION END -->
+
 ## The Process
 
 ```dot
@@ -164,7 +200,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: docs/superpowers/plans/feature-plan.md]
+[Read plan file once: docs/plans/feature-plan.md]
 [Extract all 5 tasks with full text and context]
 [Note plan Domain Specialist: rust-engineer-cloud]
 [Create TodoWrite with all tasks]

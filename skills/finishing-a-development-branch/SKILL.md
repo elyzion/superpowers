@@ -198,3 +198,25 @@ git worktree remove <worktree-path>
 
 **Pairs with:**
 - **using-git-worktrees** - Cleans up worktree created by that skill
+
+<!-- TASK-DRIVEN WORKFLOW EXTENSION START -->
+## SEQUENCE.md Update
+
+After successful merge/commit, if the completed work corresponds to a milestone task
+(a task file with `Task Type:` metadata), mark it ✅ in the relevant SEQUENCE.md file.
+Also update the project's status tracking file if test counts changed.
+
+**Then prompt the user with next steps:**
+
+Check SEQUENCE.md for the next available task (first ⬜ with all dependencies ✅).
+
+> "Task [ID] is complete and marked ✅ in SEQUENCE.md.
+> Next available task: [next task ID] — [title] ([Task Type], [Phase]).
+> Start working on it?"
+
+If no tasks are available (all remaining tasks have unmet dependencies), report:
+> "No tasks currently unblocked. [N] tasks remain, blocked on [list of blocking task IDs]. Focus on completing those first."
+
+If all tasks are ✅, suggest milestone completion:
+> "All tasks in [milestone] are complete! Run the milestone completion checklist (§18 in AIDLC-WORKFLOW.md)?"
+<!-- TASK-DRIVEN WORKFLOW EXTENSION END -->

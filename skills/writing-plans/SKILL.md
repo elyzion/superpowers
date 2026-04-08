@@ -15,7 +15,40 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+<!-- TASK-DRIVEN WORKFLOW EXTENSION START -->
+## Prerequisite: Isolated Workspace
+
+Before generating a plan, verify a git worktree exists for this task.
+If not, invoke `using-git-worktrees` to create one. This is mandatory
+when brainstorming was short-circuited by a task file.
+
+## Phase-Aware Plan Generation
+
+When the source is a task file with a `Phase` field, announce the detected phase as a status line (not a blocking question — the user already confirmed during brainstorming short-circuit):
+
+> "Phase: [RED] → generating test-only plan."
+> "Phase: [GREEN] → generating implementation-only plan."
+
+Then apply the phase constraint:
+
+- **Phase: RED** — Generate ONLY test-writing steps and `todo!()` stub creation.
+  No implementation logic in any step. Every function body is `todo!()`.
+- **Phase: GREEN** — Generate ONLY implementation steps. No test creation or
+  modification steps. The tests already exist from the RED phase.
+- **Phase absent (Integration)** — Generate standard TDD plan (tests + implementation).
+- **Task Type: Mechanical** — Generate direct execution steps. No TDD required.
+
+## Plan Persistence
+
+- **If triggered from a milestone task file:** The plan is transient — consumed by
+  execution, not saved to disk. The task file is the durable record.
+- **If triggered from a spec file in `docs/specs/`:** Append the plan to the spec
+  file as a `## Implementation Plan` section.
+- **If triggered from ad-hoc work:** Save the plan appended to the spec file.
+<!-- TASK-DRIVEN WORKFLOW EXTENSION END -->
+
+**Save plans to:** `docs/specs/` (appended to the spec file that triggered the plan)
+- For milestone task files, plans are transient and not saved
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -218,7 +251,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved. Review it above — let me know if you want changes. Otherwise, two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 

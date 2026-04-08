@@ -5,6 +5,22 @@ description: "You MUST use this before any creative work - creating features, bu
 
 # Brainstorming Ideas Into Designs
 
+<!-- TASK-DRIVEN WORKFLOW EXTENSION START -->
+## Task File Short-Circuit
+
+If the user references a pre-scoped task file (a markdown file with `Task Type:` and/or
+`Phase:` metadata fields), **skip brainstorming entirely**. The task file IS the spec.
+
+**Confirm once before proceeding:**
+
+> "Found task file [path] — [Task Type], Phase [phase]. Pre-scoped spec, skipping brainstorming and going to planning. OK?"
+
+If the user confirms, proceed to writing-plans (for Contract/Integration tasks) or
+direct execution (for Mechanical tasks).
+
+If the user says no or wants changes, discuss the task scope before proceeding.
+<!-- TASK-DRIVEN WORKFLOW EXTENSION END -->
+
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
@@ -26,7 +42,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write design doc** — save to `docs/specs/YYYY-MM-DD-<topic>-design.md` and commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -108,7 +124,7 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
