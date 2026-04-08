@@ -4,6 +4,8 @@
 
 **Superpowers** is a complete software development workflow plugin for AI coding agents (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot CLI, OpenCode). It provides a composable "skills" library that transforms how coding agents approach software development tasks.
 
+> **Fork of [obra/superpowers](https://github.com/obra/superpowers)** with task-driven workflow extensions, milestone planning, and project scaffolding.
+
 **Version:** 5.0.7
 
 **Core Philosophy:**
@@ -23,6 +25,8 @@ superpowers/
 │   ├── dispatching-parallel-agents/  # Concurrent subagent workflows
 │   ├── executing-plans/       # Batch execution with checkpoints
 │   ├── finishing-a-development-branch/  # Merge/PR decision workflow
+│   ├── milestone-planning/    # Decompose milestones into ordered task files
+│   ├── project-init/          # Scaffold task-driven AIDLC workflow for new projects
 │   ├── receiving-code-review/ # Responding to review feedback
 │   ├── requesting-code-review/  # Pre-review checklist
 │   ├── subagent-driven-development/   # Fast iteration with three-stage review + specialist routing
@@ -31,6 +35,7 @@ superpowers/
 │   ├── using-git-worktrees/   # Parallel development branches
 │   ├── using-superpowers/     # Introduction to the skills system
 │   ├── verification-before-completion/  # Ensure fixes actually work
+│   ├── workflow-doctor/       # Validate workflow configuration health
 │   ├── writing-plans/         # Detailed implementation planning
 │   └── writing-skills/        # Create new skills (meta-skill)
 ├── agents/                    # Agent configuration files
@@ -42,7 +47,6 @@ superpowers/
 │   ├── qa-tester.md                  # QA/testing specialist reviewer
 │   ├── rust-engineer-local.md        # Local Rust specialist
 │   └── rust-engineer-cloud.md        # Cloud Rust specialist
-├── commands/                  # CLI commands for various platforms
 ├── docs/                      # Documentation files
 ├── hooks/                     # Platform-specific hooks (Claude Code, Cursor)
 ├── scripts/                   # Utility scripts (e.g., bump-version.sh)
@@ -50,7 +54,6 @@ superpowers/
     ├── brainstorm-server/
     ├── claude-code/
     ├── explicit-skill-requests/
-    ├── opencode/
     ├── skill-triggering/
     └── subagent-driven-dev/
 ```
@@ -60,22 +63,12 @@ superpowers/
 | File | Purpose |
 |------|---------|
 | `package.json` | Plugin metadata (name, version, entry point) |
-| `.claude-plugin/plugin.json` | Claude Code plugin registration |
 | `qwen-extension.json` | Qwen Code extension registration (agents directory) |
 | `AGENTS.md` | Contributor guidelines (strict PR requirements) |
 | `CLAUDE.md` | Same as AGENTS.md — contributor guidelines |
 | `GEMINI.md` | Gemini-specific instructions + tool mapping |
-| `gemini-extension.json` | Gemini CLI extension metadata |
 | `hooks/hooks.json` | Hook definitions for session start |
-| `hooks/run-hook.cmd` | Hook execution script |
-| `agents/code-reviewer.md` | General code reviewer agent |
-| `agents/general-engineer-local.md` | Local general-purpose implementer |
-| `agents/general-engineer-cloud.md` | Cloud general-purpose implementer |
-| `agents/ml-engineer-local.md` | Local ML specialist |
-| `agents/ml-engineer-cloud.md` | Cloud ML specialist |
-| `agents/qa-tester.md` | QA/testing specialist agent |
-| `agents/rust-engineer-local.md` | Local Rust specialist |
-| `agents/rust-engineer-cloud.md` | Cloud Rust specialist |
+| `agents/*.md` | Specialist agent definitions (8 agents) |
 
 ## Skills Workflow
 
@@ -93,16 +86,27 @@ The skills trigger automatically based on context:
 
 When `subagent-driven-development` executes a plan, it dispatches the appropriate agent based on:
 
-1. **Plan-level `Domain Specialist:`** — annotated by writing-plans (e.g., `rust-engineer-cloud`, `ml-engineer-cloud`, `qa-tester`)
+1. **Plan-level `Domain Specialist:`** — annotated by writing-plans
 2. **Task-level `Task Specialist:`** — per-task override in the plan
 3. **Inference from task content** — file extensions, technology mentions
 
-Specialist agents bring domain expertise that general-purpose agents lack:
-- **rust-engineer-local** / **rust-engineer-cloud** — Ownership/borrowing, clippy compliance, unsafe scrutiny, ecosystem patterns (local: mechanical tasks; cloud: complex reasoning)
-- **ml-engineer-local** / **ml-engineer-cloud** — Data validation, evaluation rigor, reproducibility, resource management (local: simple scripts; cloud: architecture)
-- **general-engineer-local** / **general-engineer-cloud** — General implementation (local: mechanical changes; cloud: multi-file integration, debugging)
-- **qa-tester** — Systematic test strategy, edge case mining, anti-pattern detection (mandatory third review stage)
+Specialist agents:
+- **rust-engineer-local** / **rust-engineer-cloud** — Rust implementation (local: mechanical; cloud: complex reasoning)
+- **ml-engineer-local** / **ml-engineer-cloud** — ML implementation (local: simple scripts; cloud: architecture)
+- **general-engineer-local** / **general-engineer-cloud** — General implementation (local: mechanical; cloud: multi-file)
+- **qa-tester** — Test strategy, edge case mining (mandatory third review stage)
 - **code-reviewer** — Code review against plans and standards
+
+### Task-Driven Workflow Extensions (Fork Addition)
+
+This fork adds a task-driven development layer on top of the base skills:
+
+- **Task files** drive implementation instead of inline plans — each task is a structured file with phase classification
+- **Phases** (RED/GREEN/Integration/Mechanical) constrain what each task can do
+- **SEQUENCE.md** orders task execution across a milestone
+- **5 skills have extension blocks:** brainstorming (task-file short-circuit), writing-plans (phase-aware generation), subagent-driven-development (phase detection + SEQUENCE.md auto-pick), finishing-a-development-branch (SEQUENCE.md update + next-task), implementer-prompt (phase constraints)
+- **3 new skills:** milestone-planning, project-init, workflow-doctor
+- **Output paths:** `docs/specs/` for brainstorming output, plans are transient or appended to spec
 
 ## Development Conventions
 
@@ -116,6 +120,8 @@ This project has a **94% PR rejection rate**. Before contributing:
 4. **Confirm change belongs in core** — domain-specific changes belong in standalone plugins
 5. **Get human partner approval** on the complete diff before submitting
 
+PRs should target elyzion/superpowers, not upstream obra/superpowers.
+
 ### What Will NOT Be Accepted
 
 - Third-party dependencies (plugin is zero-dependency by design)
@@ -123,8 +129,6 @@ This project has a **94% PR rejection rate**. Before contributing:
 - Project-specific or personal configuration
 - Bulk/spray-and-pray PRs
 - Speculative or theoretical fixes
-- Domain-specific skills
-- Fork-specific changes
 - Fabricated content
 - Bundled unrelated changes
 
@@ -152,19 +156,18 @@ The project enforces strict TDD:
 
 | Platform | Installation Method |
 |----------|-------------------|
-| Claude Code | `/plugin install superpowers@claude-plugins-official` |
-| Cursor | `/add-plugin superpowers` |
+| Claude Code | `/plugin install superpowers@claude-plugins-official` (installs upstream) |
+| Cursor | `/add-plugin superpowers` (installs upstream) |
 | Codex | Follow `.codex/INSTALL.md` |
 | OpenCode | Follow `.opencode/INSTALL.md` |
 | GitHub Copilot CLI | `copilot plugin install superpowers@superpowers-marketplace` |
-| Gemini CLI | `gemini extensions install https://github.com/obra/superpowers` |
+| Gemini CLI | `gemini extensions install https://github.com/elyzion/superpowers` |
 
 ## Testing
 
 Tests live in the `tests/` directory and verify skill behavior across platforms:
 
 - `tests/claude-code/` — Claude Code specific tests
-- `tests/opencode/` — OpenCode specific tests
 - `tests/skill-triggering/` — Skill activation tests
 - `tests/subagent-driven-dev/` — Subagent workflow tests
 - `tests/explicit-skill-requests/` — Skill invocation tests
@@ -173,9 +176,6 @@ Tests live in the `tests/` directory and verify skill behavior across platforms:
 ## Useful Commands
 
 ```bash
-# Update plugin
-/plugin update superpowers
-
 # Version bump (for maintainers)
 ./scripts/bump-version.sh
 ```
@@ -185,14 +185,16 @@ Tests live in the `tests/` directory and verify skill behavior across platforms:
 - **"Human partner"** — Deliberate term for the user (not interchangeable with "the user")
 - **"Skill"** — A markdown file that shapes agent behavior during development
 - **"Subagent"** — A spawned agent instance for parallel task execution
-- **"Specialist Agent"** — A subagent with domain-specific expertise (rust-engineer-local/cloud, ml-engineer-local/cloud, general-engineer-local/cloud, qa-tester, code-reviewer)
+- **"Specialist Agent"** — A subagent with domain-specific expertise
 - **"Domain Specialist"** — Plan-level annotation that guides specialist agent dispatch
 - **"Worktree"** — An isolated git workspace for development branches
+- **"Task file"** — A structured file that drives implementation of a single unit of work
+- **"Phase"** — Classification of a task (RED, GREEN, Integration, Mechanical) that constrains implementation scope
+- **"SEQUENCE.md"** — Ordered list of task files for milestone execution
 - **"Slop"** — Low-quality, agent-generated PRs that will be closed without review
 
 ## Community
 
-- **Discord:** https://discord.gg/Jd8Vphy9jq
-- **Issues:** https://github.com/obra/superpowers/issues
-- **Release announcements:** https://primeradiant.com/superpowers/
-- **Author:** Jesse Vincent (obra)
+- **Upstream:** https://github.com/obra/superpowers (original project by Jesse Vincent)
+- **Fork:** https://github.com/elyzion/superpowers (task-driven workflow extensions)
+- **Discord:** https://discord.gg/Jd8Vphy9jq (upstream community)

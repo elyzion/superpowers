@@ -1,5 +1,7 @@
 # Superpowers
 
+> **Fork of [obra/superpowers](https://github.com/obra/superpowers)** with task-driven workflow extensions, milestone planning, and project scaffolding. See [upstream](https://github.com/obra/superpowers) for the original project.
+
 Superpowers is a complete software development workflow for your coding agents, built on top of a set of composable "skills" and some initial instructions that make sure your agent uses them.
 
 ## How it works
@@ -67,7 +69,7 @@ or search for "superpowers" in the plugin marketplace.
 Tell Codex:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.codex/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/elyzion/superpowers/refs/heads/main/.codex/INSTALL.md
 ```
 
 **Detailed docs:** [docs/README.codex.md](docs/README.codex.md)
@@ -77,7 +79,7 @@ Fetch and follow instructions from https://raw.githubusercontent.com/obra/superp
 Tell OpenCode:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/obra/superpowers/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/elyzion/superpowers/refs/heads/main/.opencode/INSTALL.md
 ```
 
 **Detailed docs:** [docs/README.opencode.md](docs/README.opencode.md)
@@ -92,7 +94,7 @@ copilot plugin install superpowers@superpowers-marketplace
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/obra/superpowers
+gemini extensions install https://github.com/elyzion/superpowers
 ```
 
 To update:
@@ -122,6 +124,14 @@ Start a new session in your chosen platform and ask for something that should tr
 7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
 
 **The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
+
+### Task-Driven Workflow (Fork Extension)
+
+When the task-driven workflow is initialized (via `project-init`), the above workflow gains:
+- **Task files** instead of inline plans — each task is a structured file with phase classification
+- **Phase enforcement** — RED tasks write tests only, GREEN tasks write implementation only
+- **Milestone planning** — breaks roadmap milestones into ordered task sequences
+- **Automatic progression** — completing a task triggers the next one via SEQUENCE.md
 
 ## What's Inside
 
@@ -159,6 +169,11 @@ Start a new session in your chosen platform and ask for something that should tr
 - **writing-skills** - Create new skills following best practices (includes testing methodology)
 - **using-superpowers** - Introduction to the skills system
 
+**Task-Driven Workflow (Fork Additions)**
+- **milestone-planning** - Decompose milestones into ordered, dependency-mapped task files with three-tier classification
+- **project-init** - Scaffold the task-driven AIDLC workflow for new projects
+- **workflow-doctor** - Validate workflow configuration health and report issues with fix commands
+
 ## Philosophy
 
 - **Test-Driven Development** - Write tests first, always
@@ -193,8 +208,9 @@ MIT License - see LICENSE file for details
 
 ## Community
 
-Superpowers is built by [Jesse Vincent](https://blog.fsck.com) and the rest of the folks at [Prime Radiant](https://primeradiant.com).
+This is a fork of [Superpowers](https://github.com/obra/superpowers) by [Jesse Vincent](https://blog.fsck.com) and the folks at [Prime Radiant](https://primeradiant.com).
 
-- **Discord**: [Join us](https://discord.gg/Jd8Vphy9jq) for community support, questions, and sharing what you're building with Superpowers
-- **Issues**: https://github.com/obra/superpowers/issues
-- **Release announcements**: [Sign up](https://primeradiant.com/superpowers/) to get notified about new versions
+- **Fork Issues**: https://github.com/elyzion/superpowers/issues
+- **Upstream Discord**: [Join](https://discord.gg/Jd8Vphy9jq) for community support, questions, and sharing what you're building with Superpowers
+- **Upstream Issues**: https://github.com/obra/superpowers/issues
+- **Upstream Release Announcements**: [Sign up](https://primeradiant.com/superpowers/) to get notified about new versions
