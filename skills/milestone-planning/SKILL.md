@@ -116,6 +116,24 @@ Present the full task list as a table:
 
 **Do NOT create any files until the user explicitly approves.** This is a hard gate.
 
+### Step 6.5: Reviewer Audit (MANDATORY)
+
+Before presenting to the human, run the breakdown through a reviewer subagent. The reviewer checks:
+
+1. **Sizing:** Any tasks >150 lines or <30 lines?
+2. **Completeness:** Does the breakdown cover everything in the milestone scope? Cross-check against roadmap deliverables and architecture contracts.
+3. **Dependencies:** Missing deps? Incorrect ordering? Parallelism opportunities missed?
+4. **Classification:** Task types correct? Any oversized Contract tasks that should split?
+5. **Scope:** Does each task touch only one component/module?
+6. **Test types:** Correct test types assigned per §10?
+7. **Agent feasibility:** Can an AI agent implement each task from the file alone?
+
+Iterate with the reviewer until findings converge. Apply all agreed changes to the breakdown before presenting to the human.
+
+> "Breakdown reviewed. [N] issues found and resolved: [summary of changes]."
+
+Then present the final breakdown to the human (Step 6 output).
+
 ### Step 7: Check for Existing Directory
 
 Before writing files, check if the milestone directory already exists:
