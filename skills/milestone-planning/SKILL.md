@@ -1,6 +1,6 @@
 ---
 name: milestone-planning
-description: "Decomposes a milestone's feature scope into ordered, dependency-mapped task files with three-tier classification (Contract/Integration/Mechanical). Use when planning a new milestone, breaking down a roadmap milestone into tasks, or when asked to create a task breakdown."
+description: "Decomposes a milestone's feature scope into ordered, dependency-mapped task files with four-tier classification (Contract/Integration/Mechanical/Content). Use when planning a new milestone, breaking down a roadmap milestone into tasks, or when asked to create a task breakdown."
 ---
 
 # Milestone Planning
@@ -69,6 +69,7 @@ Assign each task a tier:
 | **Contract** | Creates new types, systems, traits, or core logic | YES — split into RED (a) and GREEN (b) |
 | **Integration** | Wires multiple existing components together | NO — single phase with tests |
 | **Mechanical** | Configuration, scaffolding, file moves, formatting | NO — single phase, no TDD |
+| **Content** | Non-code artifacts (YAML, prompts, config, writing) | NO — human-authored or AI draft → human review |
 
 Split every Contract task into two:
 - **[ID]a** (RED): Write failing tests + stub signatures. Zero implementation.
@@ -80,6 +81,7 @@ Draw the dependency graph. Rules:
 - GREEN tasks always depend on their RED counterpart
 - Integration tasks depend on the GREEN tasks of the components they wire together
 - Mechanical tasks typically have no dependencies (or depend on project setup)
+- Content tasks use `M{N}-C{NNN}` naming. Front-load them in SEQUENCE.md — they block code tasks and require human input. Use schema-first pattern: define format (Mechanical) before content (Content) so tests can validate against schema while content is authored.
 - No circular dependencies (if found, restructure)
 
 Present the dependency graph:
