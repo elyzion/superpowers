@@ -153,6 +153,23 @@ Assign a `Task Specialist` to each task based on the project's available agents 
 
 > "Writing [N] task files to docs/milestones/[milestone-name]/..."
 
+### Step 8.5: Per-Task Reviewer Audit (MANDATORY)
+
+After writing all task files, run every task file through a reviewer subagent. Batch tasks into logical groups (e.g., core types, world systems, body systems, integration) for efficiency.
+
+The reviewer checks each task file for:
+
+1. **Agent feasibility:** Can an AI agent implement this from the file alone, without asking questions?
+2. **Type correctness:** Do type definitions match GUIDANCE.md contracts? Are serialization derives correct? Are Bevy-runtime types (Entity) avoided in serializable structs?
+3. **Numeric specificity:** Are all constants, rates, thresholds, and durations specified? (Agents cannot guess half-lives or drift rates.)
+4. **Test specificity:** Are test descriptions concrete enough to write? Do they include expected values?
+5. **Dependency completeness:** Does the task reference all types/systems it reads from? Are cross-crate imports accounted for?
+6. **Scope boundaries:** Does the task touch only one module? Is it 30-150 lines?
+
+Iterate with the reviewer until findings converge. Apply all fixes to the task files.
+
+> "Reviewer audit complete. [N] fixes applied across [M] task files: [summary of changes]."
+
 ### Step 9: Commit
 
 Ask before committing:
