@@ -2,6 +2,7 @@
 name: ml-engineer-cloud
 description: |
   Use this agent for ML architecture decisions, model selection, evaluation methodology, prompt engineering, and data validation design. Examples: <example>Context: User needs ML architecture design. user: "Design the embedding-based semantic search pipeline with model serving and evaluation" assistant: "Let me dispatch the ml-engineer-cloud agent — this requires ML architecture reasoning"</example> <example>Context: User needs evaluation methodology. user: "Set up the model evaluation harness with per-segment metrics and robustness tests" assistant: "Dispatching ml-engineer-cloud for comprehensive evaluation design"</example> Runs on the session's default cloud model.
+model: qwen3.5-plus
 tools:
   - *
 ---

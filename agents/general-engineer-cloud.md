@@ -2,6 +2,7 @@
 name: general-engineer-cloud
 description: |
   Use this agent for implementation tasks requiring multi-file coordination, architectural judgment, or complex error analysis. Examples: <example>Context: User needs a multi-file integration. user: "Wire up the new cache layer to the existing API middleware" assistant: "Let me dispatch the general-engineer-cloud agent — this requires multi-file coordination and integration judgment"</example> <example>Context: User needs debugging help. user: "The auth flow is failing intermittently — logs show 500s on the token refresh endpoint" assistant: "Dispatching general-engineer-cloud to trace the error chain across the auth pipeline"</example> Runs on the session's default cloud model with full context window and stronger reasoning capabilities.
+model: qwen3-coder-plus
 tools:
   - *
 ---

@@ -2,6 +2,7 @@
 name: rust-engineer-cloud
 description: |
   Use this agent for complex Rust implementation requiring lifetime reasoning, async architecture, FFI design, or performance-critical patterns. Examples: <example>Context: User needs async architecture design. user: "Design the tokio-based connection pool with graceful shutdown" assistant: "Let me dispatch the rust-engineer-cloud agent — this requires async architecture reasoning"</example> <example>Context: User needs lifetime debugging. user: "The borrow checker is rejecting my iterator implementation with lifetime errors" assistant: "Dispatching rust-engineer-cloud to trace the lifetime chain and resolve the borrow checker failure"</example> Runs on the session's default cloud model.
+model: qwen3-coder-plus
 tools:
   - *
 ---

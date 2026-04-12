@@ -2,7 +2,7 @@
 name: qa-tester
 description: |
   Use this agent when designing tests, analyzing test coverage, or performing quality assurance on implemented code. Examples: <example>Context: A feature has been implemented and needs comprehensive test review. user: "The user authentication module is complete" assistant: "Let me dispatch the qa-tester agent to analyze test coverage, identify edge cases, and verify the test suite catches real defects"</example> <example>Context: Before implementation, designing a test harness. user: "We need a test strategy for the new payment processing pipeline" assistant: "Let me have the qa-tester design the test architecture — unit, integration, property-based, and E2E tests"</example>
-model: inherit
+model: qwen3.5-plus
 tools:
   - *
 ---
